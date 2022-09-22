@@ -25,13 +25,15 @@ namespace blockSchemeEditor.Elements
             new Node(NodePosition.Bottom)
         };
 
+        private int nodeOffset = 7;
+
         public IElement elementData { get; private set; }
         Font drawFont = new Font("Microsoft Sans Serif", 14);
-        public ElementObject(int num, Point startPos ,IElement elementData)
+        public ElementObject(Point startPos ,IElement elementData, string description = "")
         {
-            Name = elementData.Name + num;
+            Name = elementData.Name;
             this.elementData = elementData;
-            Description = Name;
+            Description = (description == "") ? Name : description;
             Position = new Point(startPos.X, startPos.Y);
             Nodes.ForEach(item =>
             {
@@ -39,7 +41,7 @@ namespace blockSchemeEditor.Elements
             });
         }
         SolidBrush TextClr = new SolidBrush(Color.Black);
-        public void Draw(Graphics g)
+        public void DrawElement(Graphics g)
         {
             StringFormat sf = new StringFormat();
             sf.LineAlignment = StringAlignment.Center;
@@ -52,14 +54,14 @@ namespace blockSchemeEditor.Elements
         }
 
 
-        public void DrawNodes(Point mousePos, Graphics g, Node selected)
+        public void DrawNodes(Point mousePos, Graphics g)
         {
             Nodes.ForEach(node =>
             {
-                if (node.connectNode != null)
+                if (node.connectNode != null && node.connectNode.connectNode == node)
                     DrawLine(g, node, node.connectNode);
 
-                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, 7))
+                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, nodeOffset))
                 {
                     g.FillEllipse(new SolidBrush(Color.Red), new Rectangle(node.position, node.Size));
                 }
@@ -91,7 +93,7 @@ namespace blockSchemeEditor.Elements
         {
             foreach (var node in Nodes)
             {
-                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, 40))
+                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, nodeOffset))
                 {
                     return node;
                 }

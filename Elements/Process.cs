@@ -13,8 +13,10 @@ namespace blockSchemeEditor.Elements
         public Size BaseSize => new Size(100, 200);
         public void Draw(Graphics graphics, Point position)
         {
-            SolidBrush _pen = new SolidBrush(Color.Aquamarine);
-            graphics.FillRectangle(_pen, new Rectangle(position.X, position.Y, BaseSize.Height, BaseSize.Width));
+            using(SolidBrush pen = new SolidBrush(Color.Aquamarine))
+            {
+                graphics.FillRectangle(pen, new Rectangle(position.X, position.Y, BaseSize.Height, BaseSize.Width));
+            }
         }
     }
 }

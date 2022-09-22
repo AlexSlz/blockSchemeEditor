@@ -1,6 +1,7 @@
 ﻿using blockSchemeEditor.Elements;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,6 @@ namespace blockSchemeEditor
     internal class Canvas
     {
         public List<ElementObject> Elements = new List<ElementObject>();
-
-        public List<Line> lines = new List<Line>();
-
         public ElementObject selectedItem { get; set; }
         public Node selectedNode { get; set; }
 
@@ -35,10 +33,9 @@ namespace blockSchemeEditor
                     selectedNode = item.DetectNodeCollision(mousePos);
             }
         }
-
-        public Node secondNode = null;
+        private Node secondNode = null;
         public void OnMouseUp()
-        {
+        {   
             if (selectedNode != null && secondNode != null)
             {
                 selectedNode.connectNode = secondNode;
@@ -80,20 +77,17 @@ namespace blockSchemeEditor
 
         }
 
+
         public void Render(Bitmap bmp, Color color)
         {
             using (var gfx = Graphics.FromImage(bmp))
             {
                 gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 gfx.Clear(color);
-                lines.ForEach(item =>
-                {
-                    item.Draw(gfx);
-                });
                 Elements.ForEach(item =>
                 {
-                    item.Draw(gfx);
-                    item.DrawNodes(mousePos, gfx, selectedNode);
+                    item.DrawElement(gfx);
+                    item.DrawNodes(mousePos, gfx);
                 });
             }
         }

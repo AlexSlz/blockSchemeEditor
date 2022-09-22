@@ -11,6 +11,22 @@ namespace blockSchemeEditor
 {
     internal static class ElementActions
     {
+        public static void DeleteElement(this List<ElementObject> elements, ElementObject element)
+        {
+            element.Nodes.ForEach(node =>
+            {
+                DeleteNode(node);
+            });
+            elements.Remove(element);
+        }
+
+        public static void DeleteNode(Node node)
+        {
+            node.connectNode = null;
+            node = null;
+        }
+
+
         public static void Move(this ElementObject element, Point pos, Point oldPos, Point elementOldPos)
         {
             element.Position.X = elementOldPos.X + (pos.X - oldPos.X);
