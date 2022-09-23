@@ -20,6 +20,7 @@ namespace blockSchemeEditor
         };
         private Canvas _canvas;
         private MyFileSystem _fileSystem;
+
         public Form1()
         {
             InitializeComponent();
