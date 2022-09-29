@@ -55,7 +55,7 @@ namespace blockSchemeEditor
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            _canvas.OnMove(e.Location, label1);
+            _canvas.OnMove(e.Location);
             if (_mouseDownOnCanvas && _canvas.selectedItem != null)
             {
                 Cursor.Current = Cursors.SizeAll;
@@ -67,11 +67,11 @@ namespace blockSchemeEditor
                 _canvas.ConnectNode();
             }
 
-            if (_mouseDownOnListBox && listBox1.SelectedIndex != -1)
+            if (_listBoxSelectIndex != -1 && listBox1.SelectedIndex != -1)
             {
-                ElementObject newElement = new ElementObject(e.Location, elements[listBox1.SelectedIndex]);
+                ElementObject newElement = new ElementObject(e.Location, elements[_listBoxSelectIndex], "", _canvas.Elements.Count);
                 _canvas.Elements.Add(newElement);
-                _mouseDownOnListBox = false;
+                _listBoxSelectIndex = -1;
             }
         }
 
@@ -81,11 +81,11 @@ namespace blockSchemeEditor
             _canvas.OnMouseUp();
         }
 
-        private bool _mouseDownOnListBox = false;
+        private int _listBoxSelectIndex = -1;
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
         {
             Cursor.Current = Cursors.SizeAll;
-            _mouseDownOnListBox = true;
+            _listBoxSelectIndex = listBox1.SelectedIndex;
         }
 
         private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -125,12 +125,12 @@ namespace blockSchemeEditor
         { 
             DialogResult dialogResult = DialogResult.No;
             if (_canvas.selectedNode != null || _canvas.selectedItem != null)
-                dialogResult = MessageBox.Show($"Delete, {_canvas.selectedItem.Description}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            
+                dialogResult = MessageBox.Show($"Delete, {_canvas.selectedItem?.Description}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
             if (_canvas.selectedNode != null && dialogResult == DialogResult.Yes)
-                ElementActions.DeleteNode(_canvas.selectedNode);
-            if(_canvas.selectedItem != null && dialogResult == DialogResult.Yes)
-                _canvas.Elements.DeleteElement(_canvas.selectedItem);
+                ElementActions.DeleteNode(_canvas, _canvas.selectedNode);
+            if (_canvas.selectedItem != null && dialogResult == DialogResult.Yes)
+                _canvas.DeleteElement(_canvas.selectedItem);
         }
 
         private void pictureToolStripMenuItem_Click(object sender, EventArgs e)

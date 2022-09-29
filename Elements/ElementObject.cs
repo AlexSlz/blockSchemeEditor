@@ -17,24 +17,24 @@ namespace blockSchemeEditor.Elements
         public string Description { get; set; }
         public Point Position;
 
-        public List<Node> Nodes = new List<Node>()
-        {
-            new Node(NodePosition.Left),
-            new Node(NodePosition.Right),
-            new Node(NodePosition.Top),
-            new Node(NodePosition.Bottom)
-        };
+        public List<Node> Nodes;
 
         private int nodeOffset = 7;
 
         public IElement elementData { get; private set; }
         Font drawFont = new Font("Microsoft Sans Serif", 14);
-        public ElementObject(Point startPos ,IElement elementData, string description = "")
+        public ElementObject(Point startPos ,IElement elementData, string description = "", int id = 0, string customName = "")
         {
-            Name = elementData.Name;
+            Name = (customName != "") ? customName : elementData.Name + id;
             this.elementData = elementData;
             Description = (description == "") ? Name : description;
             Position = new Point(startPos.X, startPos.Y);
+            Nodes = new List<Node>() {
+                new Node(NodePosition.Left, this),
+                new Node(NodePosition.Right, this),
+                new Node(NodePosition.Top, this),
+                new Node(NodePosition.Bottom, this)
+            };
             Nodes.ForEach(item =>
             {
                 item.Move(Position, elementData.BaseSize);
@@ -52,14 +52,12 @@ namespace blockSchemeEditor.Elements
                 elementData.BaseSize.Height, elementData.BaseSize.Width), sf);
             DrawDebugPanel(g);
         }
-
-
         public void DrawNodes(Point mousePos, Graphics g)
         {
             Nodes.ForEach(node =>
             {
-                if (node.connectNode != null && node.connectNode.connectNode == node)
-                    DrawLine(g, node, node.connectNode);
+/*                if (node.connectNode != null && node.connectNode.connectNode == node)
+                    DrawLine(g, node, node.connectNode);*/
 
                 if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, nodeOffset))
                 {
@@ -67,15 +65,13 @@ namespace blockSchemeEditor.Elements
                 }
             });
         }
-
-        private void DrawLine(Graphics g, Node first, Node second)
+/*        private void DrawLine(Graphics g, Node first, Node second)
         {
             Point x = new Point(first.position.X + first.Size.Height / 2, first.position.Y + first.Size.Width / 2);
             Point y = new Point(second.position.X + second.Size.Height / 2, second.position.Y + second.Size.Width / 2);
 
             g.DrawLine(new Pen(Color.Black, 5), x, y);
-        }
-
+        }*/
         private void DrawDebugPanel(Graphics g)
         {
             string text = $"{Position.X}|{Position.Y}";
@@ -83,12 +79,10 @@ namespace blockSchemeEditor.Elements
             g.FillRectangle(new SolidBrush(Color.White), new Rectangle(p, TextRenderer.MeasureText(text, drawFont)));
             g.DrawString(text, drawFont, TextClr, p);
         }
-
         public bool DetectElementCollision(Point mousePos)
         {
             return DetectCollision(new Rectangle(Position, elementData.BaseSize), mousePos);
         }
-
         public Node DetectNodeCollision(Point mousePos)
         {
             foreach (var node in Nodes)
@@ -100,7 +94,6 @@ namespace blockSchemeEditor.Elements
             }
             return null;
         }
-        
         private bool DetectCollision(Rectangle element, Point mousePos, int offset = 0)
         {
             int x = element.Height + element.X;

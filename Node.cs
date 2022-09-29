@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blockSchemeEditor
 {
@@ -12,13 +9,17 @@ namespace blockSchemeEditor
     {
         public Point position;
         public Size Size => new Size(30,30);
-
         public NodePosition nodePosition { get; set; }
 
-        public Node connectNode = null;
-        public Node(NodePosition position)
+        public List<Line> Lines;
+
+        public ElementObject Parent { get; private set; }
+
+        public Node(NodePosition position, ElementObject parent)
         {
+            Lines = new List<Line>();
             nodePosition = position;
+            Parent = parent;
         }
         public void Move(Point pos, Size size)
         {
@@ -39,26 +40,6 @@ namespace blockSchemeEditor
                     break;
             }
         }
-
-/*        public void Swipe(NodePosition position)
-        {
-            switch (position)
-            {
-                case NodePosition.Left:
-                    nodePosition = NodePosition.Right;
-                    break;
-                case NodePosition.Right:
-                    nodePosition = NodePosition.Left;
-                    break;
-                case NodePosition.Top:
-                    nodePosition = NodePosition.Bottom;
-                    break;
-                case NodePosition.Bottom:
-                    nodePosition = NodePosition.Top;
-                    break;
-            }
-        }*/
-
     }
     enum NodePosition
     {

@@ -15,6 +15,7 @@ namespace blockSchemeEditor
     internal class Canvas
     {
         public List<ElementObject> Elements = new List<ElementObject>();
+        public List<Line> Lines = new List<Line>();
         public ElementObject selectedItem { get; set; }
         public Node selectedNode { get; set; }
 
@@ -38,8 +39,7 @@ namespace blockSchemeEditor
         {   
             if (selectedNode != null && secondNode != null)
             {
-                selectedNode.connectNode = secondNode;
-                secondNode.connectNode = selectedNode;
+                Lines.Add(new Line(selectedNode, secondNode));
             }
         }
 
@@ -61,22 +61,10 @@ namespace blockSchemeEditor
 
 
         Point mousePos;
-        public void OnMove(Point mousePos, Label text)
+        public void OnMove(Point mousePos)
         {
             this.mousePos = mousePos;
-
-            string temp = "";
-
-            if (selectedNode != null)
-                temp += $"+{selectedNode}\n";
-            if(secondNode != null)
-            {
-                temp += $"-{secondNode}\n";
-            }
-            text.Text = temp;
-
         }
-
 
         public void Render(Bitmap bmp, Color color)
         {
@@ -89,6 +77,10 @@ namespace blockSchemeEditor
                     item.DrawElement(gfx);
                     item.DrawNodes(mousePos, gfx);
                 });
+                Lines.ForEach(line =>
+                {
+                    line.Draw(gfx);
+                });
             }
         }
 
@@ -97,6 +89,13 @@ namespace blockSchemeEditor
             selectedItem = null;
             selectedNode = null;
             secondNode = null;
+        }
+
+        public Node FindNode(string nodeDes)
+        {
+            ElementObject tempObject = Elements.Find(item => item.Name == nodeDes.Split('.')[0]);
+            Node node = tempObject.Nodes.Find(item => item.nodePosition == (NodePosition)Enum.Parse(typeof(NodePosition), nodeDes.Split('.')[1]));
+            return node;
         }
 
     }
