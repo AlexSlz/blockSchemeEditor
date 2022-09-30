@@ -27,8 +27,6 @@ namespace blockSchemeEditor
             InitListBox();
             _canvas = new Canvas();
             _fileSystem = new MyFileSystem(_canvas);
-            //_render = new Render(new Size(pictureBox1.Width, pictureBox1.Height), _canvas);
-
         }
 
         private void InitListBox()

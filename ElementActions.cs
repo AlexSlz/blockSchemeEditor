@@ -1,6 +1,7 @@
 ﻿using blockSchemeEditor.Elements;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace blockSchemeEditor
 {
     internal static class ElementActions
     {
+
         public static void DeleteElement(this Canvas canvas, ElementObject element)
         {
             element.Nodes.ForEach(node =>
