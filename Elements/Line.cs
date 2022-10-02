@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace blockSchemeEditor.Elements
 {
@@ -22,10 +18,17 @@ namespace blockSchemeEditor.Elements
 
         public void Draw(Graphics graphics)
         {
-            Point x = new Point(FirstNode.position.X + FirstNode.Size.Height / 2, FirstNode.position.Y + FirstNode.Size.Width / 2);
-            Point y = new Point(SecondNode.position.X + SecondNode.Size.Height / 2, SecondNode.position.Y + SecondNode.Size.Width / 2);
+            using(AdjustableArrowCap bigArrow = new AdjustableArrowCap(4, 4))
+            using (Pen p = new Pen(Color.Black, 5))
+            {
 
-            graphics.DrawLine(new Pen(Color.Black, 5), x, y);
+                Point first = new Point(FirstNode.position.X + FirstNode.Size.Height / 2, FirstNode.position.Y + FirstNode.Size.Width / 2);
+                Point second = new Point(SecondNode.position.X + SecondNode.Size.Height / 2, SecondNode.position.Y + SecondNode.Size.Width / 2);
+
+                p.CustomEndCap = bigArrow;
+
+                graphics.DrawLine(p, first, second);
+            }
         }
     }
 }

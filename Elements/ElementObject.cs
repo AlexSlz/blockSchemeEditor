@@ -1,33 +1,26 @@
-﻿using blockSchemeEditor;
-using blockSchemeEditor.Elements;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace blockSchemeEditor.Elements
 {
     internal class ElementObject
     {
-        public string Name { get; private set; }
+        public string Id { get; private set; }
         public string Description { get; set; }
         public Point Position;
 
         public List<Node> Nodes;
-
         private int nodeOffset = 7;
-
         public IElement elementData { get; private set; }
+
         Font drawFont = new Font("Microsoft Sans Serif", 14);
-        public ElementObject(Point startPos ,IElement elementData, string description = "", int id = 0, string customName = "")
+        public ElementObject(Point startPos ,IElement elementData, string description = "", string id = "")
         {
-            Name = (customName != "") ? customName : elementData.Name + id;
+            Id = (id == "") ? Guid.NewGuid().ToString("N") : id;
             this.elementData = elementData;
-            Description = (description == "") ? Name : description;
+            Description = (description == "") ? elementData.Name : description;
             Position = new Point(startPos.X, startPos.Y);
             Nodes = new List<Node>() {
                 new Node(NodePosition.Left, this),
@@ -47,57 +40,47 @@ namespace blockSchemeEditor.Elements
             sf.LineAlignment = StringAlignment.Center;
             sf.Alignment = StringAlignment.Center;
             elementData.Draw(g, Position);
-            g.DrawString((Description == "") ? Name : Description, drawFont, TextClr, 
-                new Rectangle(Position.X, Position.Y,
-                elementData.BaseSize.Height, elementData.BaseSize.Width), sf);
+            g.DrawString((Description == "") ? elementData.Name : Description, drawFont, TextClr, 
+                new System.Drawing.Rectangle(Position.X, Position.Y,
+                elementData.BaseSize.Width, elementData.BaseSize.Height), sf);
             DrawDebugPanel(g);
         }
         public void DrawNodes(Point mousePos, Graphics g)
         {
             Nodes.ForEach(node =>
             {
-/*                if (node.connectNode != null && node.connectNode.connectNode == node)
-                    DrawLine(g, node, node.connectNode);*/
-
-                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, nodeOffset))
+                if (DetectCollision(new System.Drawing.Rectangle(node.position, node.Size), mousePos, nodeOffset))
                 {
-                    g.FillEllipse(new SolidBrush(Color.Red), new Rectangle(node.position, node.Size));
+                    g.FillEllipse(new SolidBrush(Color.Red), new System.Drawing.Rectangle(node.position, node.Size));
                 }
             });
         }
-/*        private void DrawLine(Graphics g, Node first, Node second)
-        {
-            Point x = new Point(first.position.X + first.Size.Height / 2, first.position.Y + first.Size.Width / 2);
-            Point y = new Point(second.position.X + second.Size.Height / 2, second.position.Y + second.Size.Width / 2);
-
-            g.DrawLine(new Pen(Color.Black, 5), x, y);
-        }*/
         private void DrawDebugPanel(Graphics g)
         {
             string text = $"{Position.X}|{Position.Y}";
             Point p = new Point(Position.X, Position.Y - 20);
-            g.FillRectangle(new SolidBrush(Color.White), new Rectangle(p, TextRenderer.MeasureText(text, drawFont)));
+            g.FillRectangle(new SolidBrush(Color.White), new System.Drawing.Rectangle(p, TextRenderer.MeasureText(text, drawFont)));
             g.DrawString(text, drawFont, TextClr, p);
         }
         public bool DetectElementCollision(Point mousePos)
         {
-            return DetectCollision(new Rectangle(Position, elementData.BaseSize), mousePos);
+            return DetectCollision(new System.Drawing.Rectangle(Position, elementData.BaseSize), mousePos);
         }
         public Node DetectNodeCollision(Point mousePos)
         {
             foreach (var node in Nodes)
             {
-                if (DetectCollision(new Rectangle(node.position, node.Size), mousePos, nodeOffset))
+                if (DetectCollision(new System.Drawing.Rectangle(node.position, node.Size), mousePos, nodeOffset))
                 {
                     return node;
                 }
             }
             return null;
         }
-        private bool DetectCollision(Rectangle element, Point mousePos, int offset = 0)
+        private bool DetectCollision(System.Drawing.Rectangle element, Point mousePos, int offset = 0)
         {
-            int x = element.Height + element.X;
-            int y = element.Width + element.Y;
+            int x = element.Width + element.X;
+            int y = element.Height + element.Y;
 
             return ((element.X <= mousePos.X + offset && x >= mousePos.X - offset) && (element.Y <= mousePos.Y + offset && y >= mousePos.Y - offset));
         }

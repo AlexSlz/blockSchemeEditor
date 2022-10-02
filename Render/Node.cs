@@ -27,16 +27,16 @@ namespace blockSchemeEditor
             switch(nodePosition)
             {
                 case NodePosition.Left:
-                    position = new Point(pos.X - Size.Height + offset, pos.Y - Size.Width / 2 + size.Width / 2);
+                    position = new Point(pos.X - Size.Width + offset, pos.Y - Size.Height / 2 + size.Height / 2);
                     break;
                 case NodePosition.Right:
-                    position = new Point(pos.X + size.Height - offset, pos.Y - Size.Width / 2 + size.Width / 2);
+                    position = new Point(pos.X + size.Width - offset, pos.Y - Size.Height / 2 + size.Height / 2);
                     break;
                 case NodePosition.Top:
-                    position = new Point(pos.X - Size.Height / 2 + size.Height / 2, pos.Y - Size.Width + offset);
+                    position = new Point(pos.X - Size.Width / 2 + size.Width / 2, pos.Y - Size.Height + offset);
                     break;
                 case NodePosition.Bottom:
-                    position = new Point(pos.X - Size.Height / 2 + size.Height / 2, pos.Y + size.Width - offset);
+                    position = new Point(pos.X - Size.Width / 2 + size.Width / 2, pos.Y + size.Height - offset);
                     break;
             }
         }

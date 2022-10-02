@@ -1,42 +1,35 @@
 ﻿using blockSchemeEditor.Elements;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace blockSchemeEditor
 {
-    internal class MyFileSystem
+    internal class FileActions
     {
         private Canvas _canvas;
         private BinaryFormatter _formatter;
         private SaveElement save;
-        public MyFileSystem(Canvas canvas)
+        public FileActions(Canvas canvas)
         {
             _formatter = new BinaryFormatter();
             _canvas = canvas;
         }
-
 
         public void CreateFile(string path)
         {
             save = new SaveElement();
             _canvas.Elements.ForEach(element =>
             {
-                save.elements.Add(new SaveElement.StructElement { Name = element.Name, Description = element.Description, 
+                save.elements.Add(new SaveElement.StructElement { Id = element.Id, Description = element.Description, 
                                  elementData = element.elementData.Name, point = element.Position });
             });
             _canvas.Lines.ForEach(line =>
             {
-                save.lines.Add(new SaveElement.StructLine { firstNodeName = line.FirstNode.Parent.Name, 
+                save.lines.Add(new SaveElement.StructLine { firstNodeId = line.FirstNode.Parent.Id, 
                                                             firstNodePos = line.FirstNode.nodePosition.ToString(), 
-                                                            secondNodeName = line.SecondNode.Parent.Name, 
+                                                            secondNodeId = line.SecondNode.Parent.Id, 
                                                             secondNodePos = line.SecondNode.nodePosition.ToString() });
             });
 
@@ -53,8 +46,7 @@ namespace blockSchemeEditor
             save = new SaveElement();
             if (File.Exists(path))
             {
-                _canvas.Elements = new List<ElementObject>();
-                _canvas.Lines = new List<Line>();
+                _canvas.ClearElements();
                 using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
                     save = (SaveElement)_formatter.Deserialize(fs);
@@ -70,7 +62,7 @@ namespace blockSchemeEditor
         {
             save.elements.ForEach(item =>
             {
-                _canvas.Elements.Add(new ElementObject(item.point, Form1.elements.Find(element => item.Name.Contains(element.Name)), item.Description, 0, item.Name));
+                _canvas.Elements.Add(new ElementObject(item.point, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Description, item.Id));
             });
         }
 
@@ -78,19 +70,19 @@ namespace blockSchemeEditor
         {
             save.lines.ForEach(line =>
             {
-                Node firstNode = FindNode(line.firstNodeName, line.firstNodePos);
-                Node secondNode = FindNode(line.secondNodeName, line.secondNodePos);
+                Node firstNode = FindNode(line.firstNodeId, line.firstNodePos);
+                Node secondNode = FindNode(line.secondNodeId, line.secondNodePos);
 
                 if(firstNode != null && secondNode != null)
                     _canvas.Lines.Add(new Line(firstNode, secondNode));
             });
         }
 
-        private Node FindNode(string elementName, string nodePos)
+        private Node FindNode(string elementId, string nodePos)
         {
             foreach (var item in _canvas.Elements)
             {
-                if(elementName == item.Name)
+                if(elementId == item.Id)
                 {
                     foreach (var node in item.Nodes)
                     {

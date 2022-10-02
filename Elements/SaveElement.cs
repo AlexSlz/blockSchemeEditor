@@ -1,10 +1,6 @@
-﻿using blockSchemeEditor.Elements;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blockSchemeEditor
 {
@@ -14,7 +10,7 @@ namespace blockSchemeEditor
         [Serializable]
         public struct StructElement
         {
-            public string Name;
+            public string Id;
             public string Description;
             public Point point;
             public string elementData;
@@ -22,9 +18,9 @@ namespace blockSchemeEditor
         [Serializable]
         public struct StructLine
         {
-            public string firstNodeName;
+            public string firstNodeId;
             public string firstNodePos;
-            public string secondNodeName;
+            public string secondNodeId;
             public string secondNodePos;
         }
 

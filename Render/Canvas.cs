@@ -1,14 +1,6 @@
 ﻿using blockSchemeEditor.Elements;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace blockSchemeEditor
 {
@@ -84,18 +76,17 @@ namespace blockSchemeEditor
             }
         }
 
+        public void ClearElements()
+        {
+            Elements = new List<ElementObject>();
+            Lines = new List<Line>();
+        }
+
         public void ResetSelected()
         {
             selectedItem = null;
             selectedNode = null;
             secondNode = null;
-        }
-
-        public Node FindNode(string nodeDes)
-        {
-            ElementObject tempObject = Elements.Find(item => item.Name == nodeDes.Split('.')[0]);
-            Node node = tempObject.Nodes.Find(item => item.nodePosition == (NodePosition)Enum.Parse(typeof(NodePosition), nodeDes.Split('.')[1]));
-            return node;
         }
 
     }

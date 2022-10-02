@@ -3,11 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Net.NetworkInformation;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
-using Process = blockSchemeEditor.Elements.Process;
 
 namespace blockSchemeEditor
 {
@@ -15,18 +11,38 @@ namespace blockSchemeEditor
     {
         internal static List<IElement> elements = new List<IElement>()
         {
-            new Process(),
-            new Ellipse()
+            new MyRectangle(),
+            new Ellipse(),
+            new RoundedRectangle()
         };
         private Canvas _canvas;
-        private MyFileSystem _fileSystem;
+        private FileActions _fileSystem;
 
-        public Form1()
+        public Form1(string[] args)
         {
             InitializeComponent();
             InitListBox();
             _canvas = new Canvas();
-            _fileSystem = new MyFileSystem(_canvas);
+            _fileSystem = new FileActions(_canvas);
+
+            if(args.Length > 0)
+            {
+                _fileSystem.Import(args[0]);
+            }
+
+
+            if (SystemActions.InitRegEdit())
+            {
+                ToolStripMenuItem deleteRegEditButton = new ToolStripMenuItem();
+                deleteRegEditButton.Text = "Delete RegEdit Items.";
+                deleteRegEditButton.Click += (object sender, EventArgs e) =>
+                {
+                    SystemActions.DeleteRegEdit();
+                    contextMenuStrip1.Items.Remove(deleteRegEditButton);
+                };
+                contextMenuStrip1.Items.Add(deleteRegEditButton);
+            }
+
         }
 
         private void InitListBox()
@@ -67,7 +83,7 @@ namespace blockSchemeEditor
 
             if (_listBoxSelectIndex != -1 && listBox1.SelectedIndex != -1)
             {
-                ElementObject newElement = new ElementObject(e.Location, elements[_listBoxSelectIndex], "", _canvas.Elements.Count);
+                ElementObject newElement = new ElementObject(e.Location, elements[_listBoxSelectIndex]);
                 _canvas.Elements.Add(newElement);
                 _listBoxSelectIndex = -1;
             }
@@ -91,7 +107,7 @@ namespace blockSchemeEditor
             _canvas.Click(new Point(e.X, e.Y));
             if (_canvas.selectedItem != null)
             {
-                textBox1.Text = (textBox1.Text != "") ? _canvas.selectedItem.Description : _canvas.selectedItem.Name;
+                textBox1.Text = _canvas.selectedItem.Description;
                 textBox1.Show();
                 textBox1.Focus();
             }
@@ -107,7 +123,7 @@ namespace blockSchemeEditor
         Stopwatch stopwatch = new Stopwatch();
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (pictureBox1.Width + pictureBox1.Height >= 100)
+            if (pictureBox1.Width + pictureBox1.Height > 0 && _canvas != null)
             {
                 stopwatch.Restart();
                 Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -121,9 +137,17 @@ namespace blockSchemeEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         { 
-            DialogResult dialogResult = DialogResult.No;
-            if (_canvas.selectedNode != null || _canvas.selectedItem != null)
-                dialogResult = MessageBox.Show($"Delete, {_canvas.selectedItem?.Description}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            string selectedItem = "All";
+            if (_canvas.selectedItem != null)
+                selectedItem = _canvas.selectedItem.Description;
+            if (_canvas.selectedNode != null)
+                selectedItem = $"{_canvas.selectedNode.Parent.Description} - Node{_canvas.selectedNode.nodePosition} Line";
+            
+            DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItem}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
+
+            if (_canvas.selectedNode == null && _canvas.selectedItem == null && dialogResult == DialogResult.Yes)
+                _canvas.ClearElements();
 
             if (_canvas.selectedNode != null && dialogResult == DialogResult.Yes)
                 ElementActions.DeleteNode(_canvas, _canvas.selectedNode);
