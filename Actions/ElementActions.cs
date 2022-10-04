@@ -24,15 +24,15 @@ namespace blockSchemeEditor
         }
         public static void Move(this ElementObject element, Point pos, Point oldPos, Point elementOldPos)
         {
-            element.Position.X = elementOldPos.X + (pos.X - oldPos.X);
-            element.Position.Y = elementOldPos.Y + (pos.Y - oldPos.Y);
+            element.Parameters.Position.X = elementOldPos.X + (pos.X - oldPos.X);
+            element.Parameters.Position.Y = elementOldPos.Y + (pos.Y - oldPos.Y);
             MoveNodes(element);
         }
         private static void MoveNodes(ElementObject element)
         {
             element.Nodes.ForEach(node =>
             {
-                node.Move(element.Position, element.elementData.BaseSize);
+                node.Move(element.Parameters.Position, element.Parameters.CustomSize);
             });
         }
 

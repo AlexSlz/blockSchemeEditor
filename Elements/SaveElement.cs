@@ -1,4 +1,5 @@
-﻿using System;
+﻿using blockSchemeEditor.Elements;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -11,8 +12,7 @@ namespace blockSchemeEditor
         public struct StructElement
         {
             public string Id;
-            public string Description;
-            public Point point;
+            public ElementParameter parameter;
             public string elementData;
         }
         [Serializable]

@@ -65,9 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\ElementActions.cs" />
+    <Compile Include="Actions\PanelActions.cs" />
     <Compile Include="Elements\ElementObject.cs" />
+    <Compile Include="Elements\ElementParameter.cs" />
     <Compile Include="Elements\ElementsData\Ellipse.cs" />
-    <Compile Include="Elements\IElement.cs" />
+    <Compile Include="Elements\ElementsData\IElement.cs" />
+    <Compile Include="Elements\ElementsData\Rhombus.cs" />
     <Compile Include="Elements\Line.cs" />
     <Compile Include="Elements\ElementsData\MyRectangle.cs" />
     <Compile Include="Elements\ElementsData\RoundedRectangle.cs" />
@@ -96,6 +99,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

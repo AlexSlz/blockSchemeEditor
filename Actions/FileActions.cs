@@ -22,8 +22,8 @@ namespace blockSchemeEditor
             save = new SaveElement();
             _canvas.Elements.ForEach(element =>
             {
-                save.elements.Add(new SaveElement.StructElement { Id = element.Id, Description = element.Description, 
-                                 elementData = element.elementData.Name, point = element.Position });
+                save.elements.Add(new SaveElement.StructElement { Id = element.Id, parameter = element.Parameters, 
+                                 elementData = element.elementData.Name});
             });
             _canvas.Lines.ForEach(line =>
             {
@@ -62,7 +62,7 @@ namespace blockSchemeEditor
         {
             save.elements.ForEach(item =>
             {
-                _canvas.Elements.Add(new ElementObject(item.point, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Description, item.Id));
+                _canvas.Elements.Add(new ElementObject(item.parameter.Position, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Id, item.parameter));
             });
         }
 

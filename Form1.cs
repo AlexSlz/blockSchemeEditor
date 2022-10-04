@@ -1,4 +1,6 @@
-﻿using blockSchemeEditor.Elements;
+﻿using blockSchemeEditor.Actions;
+using blockSchemeEditor.Elements;
+using blockSchemeEditor.Elements.ElementsData;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,17 +15,22 @@ namespace blockSchemeEditor
         {
             new MyRectangle(),
             new Ellipse(),
-            new RoundedRectangle()
+            new RoundedRectangle(),
+            new Rhombus()
         };
         private Canvas _canvas;
         private FileActions _fileSystem;
+        private PanelActions _panelActions;
 
         public Form1(string[] args)
         {
             InitializeComponent();
+            panel1.Hide();
+
             InitListBox();
             _canvas = new Canvas();
             _fileSystem = new FileActions(_canvas);
+            _panelActions = new PanelActions(panel1, _canvas);
 
             if(args.Length > 0)
             {
@@ -58,13 +65,14 @@ namespace blockSchemeEditor
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             _canvas.ResetSelected();
-            textBox1.Hide();
+            panel1.Hide();
+            panel1.Controls.Clear();
             _oldPos = e.Location;
             _mouseDownOnCanvas = true;
             _canvas.Click(new Point(e.X, e.Y));
 
             if (_canvas.selectedItem != null)
-                _elementOldPos = _canvas.selectedItem.Position;
+                _elementOldPos = _canvas.selectedItem.Parameters.Position;
             
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -107,16 +115,8 @@ namespace blockSchemeEditor
             _canvas.Click(new Point(e.X, e.Y));
             if (_canvas.selectedItem != null)
             {
-                textBox1.Text = _canvas.selectedItem.Description;
-                textBox1.Show();
-                textBox1.Focus();
-            }
-        }
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            if (_canvas.selectedItem != null)
-            {
-                _canvas.selectedItem.Description = textBox1.Text;
+                panel1.Show();
+                _panelActions.InitPanel(_canvas.selectedItem.Parameters);
             }
         }
 
@@ -137,12 +137,11 @@ namespace blockSchemeEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         { 
-
             string selectedItem = "All";
             if (_canvas.selectedItem != null)
-                selectedItem = _canvas.selectedItem.Description;
+                selectedItem = _canvas.selectedItem.Parameters.Text;
             if (_canvas.selectedNode != null)
-                selectedItem = $"{_canvas.selectedNode.Parent.Description} - Node{_canvas.selectedNode.nodePosition} Line";
+                selectedItem = $"Node{_canvas.selectedNode.nodePosition} Line";
             
             DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItem}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
 

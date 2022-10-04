@@ -8,20 +8,20 @@ namespace blockSchemeEditor.Elements
     internal class ElementObject
     {
         public string Id { get; private set; }
-        public string Description { get; set; }
-        public Point Position;
+
+        public ElementParameter Parameters = null;
 
         public List<Node> Nodes;
         private int nodeOffset = 7;
         public IElement elementData { get; private set; }
 
         Font drawFont = new Font("Microsoft Sans Serif", 14);
-        public ElementObject(Point startPos ,IElement elementData, string description = "", string id = "")
+        public ElementObject(Point startPos ,IElement elementData, string id = "", ElementParameter parameter = null)
         {
             Id = (id == "") ? Guid.NewGuid().ToString("N") : id;
             this.elementData = elementData;
-            Description = (description == "") ? elementData.Name : description;
-            Position = new Point(startPos.X, startPos.Y);
+            Parameters = (parameter != null) ? parameter : elementData.Parameters;
+            Parameters.Position = startPos;
             Nodes = new List<Node>() {
                 new Node(NodePosition.Left, this),
                 new Node(NodePosition.Right, this),
@@ -30,7 +30,7 @@ namespace blockSchemeEditor.Elements
             };
             Nodes.ForEach(item =>
             {
-                item.Move(Position, elementData.BaseSize);
+                item.Move(Parameters.Position, Parameters.CustomSize);
             });
         }
         SolidBrush TextClr = new SolidBrush(Color.Black);
@@ -39,11 +39,9 @@ namespace blockSchemeEditor.Elements
             StringFormat sf = new StringFormat();
             sf.LineAlignment = StringAlignment.Center;
             sf.Alignment = StringAlignment.Center;
-            elementData.Draw(g, Position);
-            g.DrawString((Description == "") ? elementData.Name : Description, drawFont, TextClr, 
-                new System.Drawing.Rectangle(Position.X, Position.Y,
-                elementData.BaseSize.Width, elementData.BaseSize.Height), sf);
-            DrawDebugPanel(g);
+            elementData.Draw(g, Parameters);
+            g.DrawString((Parameters.Text == "") ? elementData.Name : Parameters.Text, drawFont, TextClr,
+                new Rectangle(Parameters.Position, Parameters.CustomSize), sf);
         }
         public void DrawNodes(Point mousePos, Graphics g)
         {
@@ -55,16 +53,16 @@ namespace blockSchemeEditor.Elements
                 }
             });
         }
-        private void DrawDebugPanel(Graphics g)
+/*        private void DrawDebugPanel(Graphics g)
         {
-            string text = $"{Position.X}|{Position.Y}";
-            Point p = new Point(Position.X, Position.Y - 20);
+            string text = $"{Parameters.Position.X}|{Parameters.Position.Y}";
+            Point p = new Point(Parameters.Position.X, Parameters.Position.Y - 20);
             g.FillRectangle(new SolidBrush(Color.White), new System.Drawing.Rectangle(p, TextRenderer.MeasureText(text, drawFont)));
             g.DrawString(text, drawFont, TextClr, p);
-        }
+        }*/
         public bool DetectElementCollision(Point mousePos)
         {
-            return DetectCollision(new System.Drawing.Rectangle(Position, elementData.BaseSize), mousePos);
+            return DetectCollision(new System.Drawing.Rectangle(Parameters.Position, Parameters.CustomSize), mousePos);
         }
         public Node DetectNodeCollision(Point mousePos)
         {
@@ -86,12 +84,4 @@ namespace blockSchemeEditor.Elements
         }
 
     }
-/*    internal static class ElementObjectExtension
-    {
-        public static void Add(this List<ElementObject> elements, ElementObject element, Canvas canvas)
-        {
-            elements.Add(element);
-            canvas.Render();
-        }
-    }*/
 }

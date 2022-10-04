@@ -1,16 +1,22 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 
 namespace blockSchemeEditor.Elements
 {
     internal class MyRectangle : IElement
     {
         public string Name => "Rectangle";
-        public Size BaseSize => new Size(200, 100);
-        public void Draw(Graphics graphics, Point position)
+
+        public ElementParameter Parameters => 
+            new ElementParameter { Text = "Rectangle",
+                                    CustomColor = Color.Aquamarine, 
+                                    CustomSize = new Size(200,100) };
+
+        public void Draw(Graphics graphics, ElementParameter parameter)
         {
-            using(SolidBrush pen = new SolidBrush(Color.Aquamarine))
+            using(SolidBrush pen = new SolidBrush(parameter.CustomColor))
             {
-                graphics.FillRectangle(pen, new System.Drawing.Rectangle(position.X, position.Y, BaseSize.Width, BaseSize.Height));
+                graphics.FillRectangle(pen, new Rectangle(parameter.Position, parameter.CustomSize));
             }
         }
     }
