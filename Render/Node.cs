@@ -11,13 +11,10 @@ namespace blockSchemeEditor
         public Size Size => new Size(30,30);
         public NodePosition nodePosition { get; set; }
 
-        public List<Line> Lines;
-
         public ElementObject Parent { get; private set; }
 
         public Node(NodePosition position, ElementObject parent)
         {
-            Lines = new List<Line>();
             nodePosition = position;
             Parent = parent;
         }

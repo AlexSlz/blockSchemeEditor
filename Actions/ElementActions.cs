@@ -1,6 +1,7 @@
 ﻿using blockSchemeEditor.Elements;
+using System.Collections.Generic;
 using System.Drawing;
-
+using System.Windows.Forms;
 
 namespace blockSchemeEditor
 {
@@ -17,7 +18,9 @@ namespace blockSchemeEditor
         }
         public static void DeleteNode(Canvas canvas, Node node)
         {
-            node.Lines.ForEach(line =>
+            var temp = canvas.Lines.FindAll(line => line.FirstNode == node || line.SecondNode == node);
+
+            temp.ForEach(line =>
             {
                 canvas.Lines.Remove(line);
             });

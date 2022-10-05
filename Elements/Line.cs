@@ -11,9 +11,9 @@ namespace blockSchemeEditor.Elements
         public Line(Node firstNode, Node secondNode)
         {
             FirstNode = firstNode;
-            firstNode.Lines.Add(this);
+            //firstNode.Lines.Add(this);
             SecondNode = secondNode;
-            secondNode.Lines.Add(this);
+            //secondNode.Lines.Add(this);
         }
 
         public void Draw(Graphics graphics)
