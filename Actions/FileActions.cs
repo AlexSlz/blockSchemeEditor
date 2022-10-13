@@ -62,7 +62,7 @@ namespace blockSchemeEditor
         {
             save.elements.ForEach(item =>
             {
-                _canvas.Elements.Add(new ElementObject(item.parameter.Position, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Id, item.parameter));
+                _canvas.AddElement(new ElementObject(item.parameter.Position, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Id, item.parameter));
             });
         }
 

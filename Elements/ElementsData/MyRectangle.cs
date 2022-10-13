@@ -8,7 +8,7 @@ namespace blockSchemeEditor.Elements
         public string Name => "Rectangle";
 
         public ElementParameter Parameters => 
-            new ElementParameter { Text = "Rectangle",
+            new ElementParameter { Text = this.Name,
                                     CustomColor = Color.Aquamarine, 
                                     CustomSize = new Size(200,100) };
 

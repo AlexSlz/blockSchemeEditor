@@ -10,10 +10,10 @@ namespace blockSchemeEditor.Elements
         public ElementParameter Parameters =>
             new ElementParameter
             {
-                Text = "Rounded Rectangle",
+                Text = this.Name,
                 CustomColor = Color.Coral,
                 CustomSize = new Size(200, 100),
-                Angle = 50,
+                Angle = 50
             };
         public void Draw(Graphics graphics, ElementParameter parameters)
         {

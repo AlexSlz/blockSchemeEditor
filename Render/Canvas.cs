@@ -1,23 +1,36 @@
 ﻿using blockSchemeEditor.Elements;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 
 namespace blockSchemeEditor
 {
     internal class Canvas
     {
         public List<ElementObject> Elements = new List<ElementObject>();
+        public event System.EventHandler ElementsChanged;
         public List<Line> Lines = new List<Line>();
         public ElementObject selectedItem { get; set; }
         public Node selectedNode { get; set; }
 
+        public virtual void OnElementsChanged()
+        {
+            if (ElementsChanged != null) ElementsChanged(this, EventArgs.Empty);
+        }
+
         public void Click(Point p)
         {
-            selectedItem = Elements.Find(item =>
+            var temp = Elements.FindAll(item =>
             {
                 return item.DetectElementCollision(p);
             });
-            if(selectedItem != null)
+
+            if (temp.Count > 0)
+                selectedItem = temp.Last();
+
+            if (selectedItem != null)
                 return;
 
             foreach (var item in Elements)
@@ -63,16 +76,18 @@ namespace blockSchemeEditor
             using (var gfx = Graphics.FromImage(bmp))
             {
                 gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                gfx.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 gfx.Clear(color);
                 Elements.ForEach(item =>
                 {
-                    item.DrawElement(gfx);
+                    item.DrawElement(gfx, item == selectedItem);
                     item.DrawNodes(mousePos, gfx);
                 });
                 Lines.ForEach(line =>
                 {
                     line.Draw(gfx);
                 });
+                Order();
             }
         }
 
@@ -88,6 +103,9 @@ namespace blockSchemeEditor
             selectedNode = null;
             secondNode = null;
         }
-
+        public void Order()
+        {
+            Elements = Elements.OrderBy(x => x.Parameters.Index).ToList();
+        }
     }
 }

@@ -34,15 +34,28 @@ namespace blockSchemeEditor.Elements
             });
         }
         SolidBrush TextClr = new SolidBrush(Color.Black);
-        public void DrawElement(Graphics g)
+        public void DrawElement(Graphics g, bool selected = false)
         {
             StringFormat sf = new StringFormat();
             sf.LineAlignment = StringAlignment.Center;
             sf.Alignment = StringAlignment.Center;
             elementData.Draw(g, Parameters);
+            if(elementData.Name != "Text")
             g.DrawString((Parameters.Text == "") ? elementData.Name : Parameters.Text, drawFont, TextClr,
                 new Rectangle(Parameters.Position, Parameters.CustomSize), sf);
+
+            if (selected)
+                DrawFrame(g);
         }
+
+        private void DrawFrame(Graphics g)
+        {
+            using(Pen pen = new Pen(Color.Aqua, 3))
+            {
+                g.DrawRectangle(pen, new Rectangle(Parameters.Position, Parameters.CustomSize));
+            }
+        }
+
         public void DrawNodes(Point mousePos, Graphics g)
         {
             Nodes.ForEach(node =>
@@ -53,13 +66,6 @@ namespace blockSchemeEditor.Elements
                 }
             });
         }
-/*        private void DrawDebugPanel(Graphics g)
-        {
-            string text = $"{Parameters.Position.X}|{Parameters.Position.Y}";
-            Point p = new Point(Parameters.Position.X, Parameters.Position.Y - 20);
-            g.FillRectangle(new SolidBrush(Color.White), new System.Drawing.Rectangle(p, TextRenderer.MeasureText(text, drawFont)));
-            g.DrawString(text, drawFont, TextClr, p);
-        }*/
         public bool DetectElementCollision(Point mousePos)
         {
             return DetectCollision(new System.Drawing.Rectangle(Parameters.Position, Parameters.CustomSize), mousePos);
@@ -82,6 +88,5 @@ namespace blockSchemeEditor.Elements
 
             return ((element.X <= mousePos.X + offset && x >= mousePos.X - offset) && (element.Y <= mousePos.Y + offset && y >= mousePos.Y - offset));
         }
-
     }
 }

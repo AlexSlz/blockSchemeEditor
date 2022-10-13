@@ -71,6 +71,7 @@
     <Compile Include="Elements\ElementsData\Ellipse.cs" />
     <Compile Include="Elements\ElementsData\IElement.cs" />
     <Compile Include="Elements\ElementsData\Rhombus.cs" />
+    <Compile Include="Elements\ElementsData\Text.cs" />
     <Compile Include="Elements\Line.cs" />
     <Compile Include="Elements\ElementsData\MyRectangle.cs" />
     <Compile Include="Elements\ElementsData\RoundedRectangle.cs" />

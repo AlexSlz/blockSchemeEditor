@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace blockSchemeEditor
@@ -13,6 +15,7 @@ namespace blockSchemeEditor
     {
         internal static List<IElement> elements = new List<IElement>()
         {
+            new Text(),
             new MyRectangle(),
             new Ellipse(),
             new RoundedRectangle(),
@@ -27,12 +30,12 @@ namespace blockSchemeEditor
             InitializeComponent();
             panel1.Hide();
 
-            InitListBox();
             _canvas = new Canvas();
             _fileSystem = new FileActions(_canvas);
             _panelActions = new PanelActions(panel1, _canvas);
+            InitListBox();
 
-            if(args.Length > 0)
+            if (args.Length > 0)
             {
                 _fileSystem.Import(args[0]);
             }
@@ -49,14 +52,41 @@ namespace blockSchemeEditor
                 };
                 contextMenuStrip1.Items.Add(deleteRegEditButton);
             }
-
+            //pictureBox1.MouseWheel += PictureBox1_MouseWheel;
         }
+
+/*        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta < 0)
+            {
+                ZoomIn();
+            }
+            else
+            {
+                ZoomOut();
+            }
+
+            label1.Text = _canvas.Zoom + "";
+        }
+
+        private void ZoomIn()
+        {
+            if (_canvas.Zoom > 1f)
+                _canvas.Zoom -= 0.1f;
+        }
+
+        private void ZoomOut()
+        {
+            if (_canvas.Zoom < 10f)
+                _canvas.Zoom += 0.1f;
+        }*/
 
         private void InitListBox()
         {
             elements.ForEach(item => {
                 listBox1.Items.Add(item.Name);
             });
+            _canvas.ElementsChanged += UpdateElementList;
         }
 
         private bool _mouseDownOnCanvas = false;
@@ -65,6 +95,7 @@ namespace blockSchemeEditor
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             _canvas.ResetSelected();
+            listBox2.ClearSelected();
             panel1.Hide();
             panel1.Controls.Clear();
             _oldPos = e.Location;
@@ -88,11 +119,11 @@ namespace blockSchemeEditor
             {
                 _canvas.ConnectNode();
             }
-
-            if (_listBoxSelectIndex != -1 && listBox1.SelectedIndex != -1)
+            if (_listBoxSelectIndex != -1)
             {
                 ElementObject newElement = new ElementObject(e.Location, elements[_listBoxSelectIndex]);
-                _canvas.Elements.Add(newElement);
+                newElement.Parameters.Index = _canvas.Elements.Count;
+                _canvas.AddElement(newElement);
                 _listBoxSelectIndex = -1;
             }
         }
@@ -108,6 +139,14 @@ namespace blockSchemeEditor
         {
             Cursor.Current = Cursors.SizeAll;
             _listBoxSelectIndex = listBox1.SelectedIndex;
+        }
+        private void listBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if(listBox1.Size.Width >= e.Location.X)
+            {
+                listBox1.ClearSelected();
+                _listBoxSelectIndex = -1;
+            }
         }
 
         private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -200,5 +239,20 @@ namespace blockSchemeEditor
                 return null;
             return saveFileDialog1.FileName;
         }
+
+        private void UpdateElementList(object sender, EventArgs e)
+        {
+            listBox2.Items.Clear();
+            _canvas.Elements.ForEach(item => {
+                listBox2.Items.Add($"{item.elementData.Name}-{item.Id}");
+            });
+        }
+
+        private void listBox2_DoubleClick(object sender, EventArgs e)
+        {
+            if(listBox2.Items.Count > 0)
+            _canvas.selectedItem = _canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1]);
+        }
+
     }
 }

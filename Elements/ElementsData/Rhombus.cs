@@ -9,7 +9,7 @@ namespace blockSchemeEditor.Elements.ElementsData
         public ElementParameter Parameters =>
             new ElementParameter
             {
-                Text = "Rhombus",
+                Text = this.Name,
                 CustomColor = Color.IndianRed,
                 CustomSize = new Size(130, 130),
             };

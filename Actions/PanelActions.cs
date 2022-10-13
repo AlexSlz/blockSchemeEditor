@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
@@ -30,12 +31,30 @@ namespace blockSchemeEditor.Actions
 
             parameter.GetType().GetFields().ToList().ForEach(item =>
             {
-                y = Init(item, parameter, y);
+                int temp = Init(item, parameter, y);
+                if(temp != -1)
+                    y = temp;
             });
             parameter.GetType().GetProperties().ToList().ForEach(item =>
             {
-                y = Init(item, parameter, y);
+                int temp = Init(item, parameter, y);
+                if (temp != -1)
+                    y = temp;
             });
+            _panel.Controls[0].Controls[_panel.Controls[0].Controls.Count - 1].Focus();
+        }
+
+        private bool Valid(string itemName, dynamic value, ElementParameter parameter)
+        {
+            foreach (var element in parameter.HideList)
+            {
+                if (itemName.Contains(element))
+                    return false;
+            }
+
+            double.TryParse(value.ToString(), out double temp);
+
+            return itemName != "HideList" && temp != int.MinValue;
         }
 
         private int Init(MemberInfo item, ElementParameter parameter, int y)
@@ -50,19 +69,21 @@ namespace blockSchemeEditor.Actions
                     value = ((PropertyInfo)item).GetValue(parameter);
                     break;
             }
-            bool hide = false;
-            var customParams = (CustomParams[])item.GetCustomAttributes(typeof(CustomParams), false);
+
+            if (!Valid(item.Name, value, parameter))
+                return -1;
+
+/*            var customParams = (CustomParams[])item.GetCustomAttributes(typeof(CustomParams), false);
             if (customParams.Length > 0)
             {
                 double.TryParse(value.ToString(), out double res);
                 hide = customParams[0].Optional && res == int.MinValue;
-            }
-            if (!hide)
-            {
+            }*/
+
                 Panel tempPanel = CreatePanel(item.Name, value, new Point(0, y));
                 _panel.Controls.Add(tempPanel);
                 y += tempPanel.Height;
-            }
+            
             return y;
         }
 
@@ -77,24 +98,24 @@ namespace blockSchemeEditor.Actions
             label.Location = new Point(0,0);
             label.Width = 150;
             panel.Controls.Add(label);
-
             switch (value.GetType().Name)
             {
                 case ("String"):
-                    panel.Controls.Add(CreateTextBox(value.ToString(), new Point(5, label.Size.Height + 5)));
+                    panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5)));
                     break;
                 case ("Double"):
-                    panel.Controls.Add(CreateNumeric((decimal)value, new Point(5, label.Size.Height + 5), 3));
+                case ("Int32"):
+                    panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5), true));
                     break;
                 case ("Point"):
                     Point point = (Point)value;
-                    panel.Controls.Add(CreateNumeric(point.X, new Point(5, label.Size.Height + 5)));
-                    panel.Controls.Add(CreateNumeric(point.Y, new Point(5, label.Size.Height + 40)));
+                    panel.Controls.Add(CreateTextBox(point.X, new Point(5, label.Size.Height + 5), true));
+                    panel.Controls.Add(CreateTextBox(point.Y, new Point(5, label.Size.Height + 40), true));
                     break;
                 case ("Size"):
                     Size size = (Size)value;
-                    panel.Controls.Add(CreateNumeric(size.Width, new Point(5, label.Size.Height + 5)));
-                    panel.Controls.Add(CreateNumeric(size.Height, new Point(5, label.Size.Height + 40)));
+                    panel.Controls.Add(CreateTextBox(size.Width, new Point(5, label.Size.Height + 5), true, false));
+                    panel.Controls.Add(CreateTextBox(size.Height, new Point(5, label.Size.Height + 40), true, false));
                     break;
                 case ("Color"):
                     panel.Controls.Add(CreateColorButton(value, new Point(5, label.Size.Height + 5)));
@@ -136,28 +157,42 @@ namespace blockSchemeEditor.Actions
             return button;
         }
 
-        private TextBox CreateTextBox(string value, Point pos)
+        private TextBox CreateTextBox(dynamic value, Point pos, bool onlyNum = false, bool needMinus = true)
         {
             TextBox textBox = new TextBox();
             textBox.Text = $"{value}";
             textBox.Location = pos;
             textBox.MaxLength = 64;
             textBox.Width = 150;
-            textBox.TextChanged += ControlChanged;
+            textBox.TextChanged += (object sender, EventArgs e) =>
+            {
+                TextBox t = (sender as TextBox);
+                if (onlyNum)
+                {
+                    int max = int.MaxValue / 9999;
+                    double.TryParse(t.Text, out double outValue);
+                    if (outValue >= max)
+                        t.Text = $"{max}";
+                    if (outValue <= -max)
+                        t.Text = $"{-max}";
+                }
+                if (((t.Text != "" || !onlyNum) || t.Text.StartsWith("-")) && (!onlyNum || t.Text.Count(char.IsDigit) > 0))
+                {
+                    ControlChanged(this, EventArgs.Empty);
+                }
+            };
+            if (onlyNum)
+                textBox.KeyPress += (object sender, KeyPressEventArgs e) =>
+                {
+                    TextBox t = sender as TextBox;
+                    e.Handled = (needMinus) ? checkKey(e) && (t.Text.IndexOf('-') >= 0) : checkKey(e);
+                };
             return textBox;
         }
 
-        private NumericUpDown CreateNumeric(decimal value, Point pos, int DecimalPlaces = 0)
+        private bool checkKey(KeyPressEventArgs e)
         {
-            NumericUpDown numericUpDown = new NumericUpDown();
-            numericUpDown.DecimalPlaces = DecimalPlaces;
-            numericUpDown.Minimum = int.MinValue / 9999;
-            numericUpDown.Maximum = int.MaxValue / 9999;
-            numericUpDown.Value = value;
-            numericUpDown.Location = pos;
-            numericUpDown.Width = 150;
-            numericUpDown.ValueChanged += ControlChanged;
-            return numericUpDown;
+            return (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar));
         }
 
         private void ControlChanged(object sender, EventArgs e)
@@ -168,7 +203,8 @@ namespace blockSchemeEditor.Actions
                     item.SetValue(_canvas.selectedItem.Parameters, GetValue(item.FieldType.Name, control));
                 });
             });
-            _canvas.selectedItem?.Parameters.GetType().GetProperties().ToList().ForEach(item => {
+            _canvas.selectedItem?.Parameters.GetType().GetProperties().ToList().ForEach(item =>
+            {
                 GetControl(item.Name, (control) =>
                 {
                     item.SetValue(_canvas.selectedItem.Parameters, GetValue(item.PropertyType.Name, control));
@@ -189,13 +225,14 @@ namespace blockSchemeEditor.Actions
 
         private dynamic GetValue(string type, Control control)
         {
-
             switch (type)
             {
                 case ("String"):
                     return control.Controls[1].Text;
                 case ("Double"):
                     return double.Parse(control.Controls[1].Text);
+                case ("Int32"):
+                    return int.Parse(control.Controls[1].Text);
                 case ("Point"):
                     return new Point(int.Parse(control.Controls[1].Text), int.Parse(control.Controls[2].Text));
                 case ("Size"):
@@ -207,7 +244,7 @@ namespace blockSchemeEditor.Actions
             }
         }
 
-        private CustomParams GetCustomParams(FieldInfo item)
+/*        private CustomParams GetCustomParams(FieldInfo item)
         {
             var customParams = (CustomParams[])item.GetCustomAttributes(typeof(CustomParams), false);
             if (customParams.Length > 0)
@@ -215,7 +252,7 @@ namespace blockSchemeEditor.Actions
                 return customParams[0];
             }
             return null;
-        }
+        }*/
 
     }
 }

@@ -9,14 +9,14 @@ namespace blockSchemeEditor.Elements
         public ElementParameter Parameters =>
             new ElementParameter
             {
-                Text = "Ellipse",
+                Text = this.Name,
                 CustomColor = Color.Yellow,
                 CustomSize = new Size(110, 110),
             };
 
         public void Draw(Graphics graphics, ElementParameter parameter)
         {
-            using (SolidBrush pen = new SolidBrush(Parameters.CustomColor))
+            using (SolidBrush pen = new SolidBrush(parameter.CustomColor))
             {
                 graphics.FillEllipse(pen, new Rectangle(parameter.Position, parameter.CustomSize));
             }
