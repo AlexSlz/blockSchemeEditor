@@ -1,5 +1,8 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace blockSchemeEditor.Elements
 {
@@ -16,16 +19,55 @@ namespace blockSchemeEditor.Elements
 
         public void Draw(Graphics graphics)
         {
-            using(AdjustableArrowCap bigArrow = new AdjustableArrowCap(4, 4))
+            using (AdjustableArrowCap bigArrow = new AdjustableArrowCap(4, 4))
             using (Pen pen = new Pen(Color.Black, 5))
             {
-                Point first = new Point(FirstNode.position.X + FirstNode.Size.Height / 2, FirstNode.position.Y + FirstNode.Size.Width / 2);
-                Point second = new Point(SecondNode.position.X + SecondNode.Size.Height / 2, SecondNode.position.Y + SecondNode.Size.Width / 2);
+                Point first = CalculateNodePosition(FirstNode);
+                Point second = CalculateNodePosition(SecondNode);
+
+                var (middle, distance) = CalculateMidpointAndDistance(first, second);
+
+                List<Point> points = new List<Point>();
+
+                points.Add(first);
+                if (middle.X != 0 && distance > 90)
+                {
+                    points.Add(middle);
+                }
+                points.Add(second);
 
                 pen.CustomEndCap = bigArrow;
 
-                graphics.DrawLine(pen, first, second);
+                graphics.DrawLines(pen, points.ToArray());
             }
         }
+
+        private (Point, double) CalculateMidpointAndDistance(Point first, Point second)
+        {
+            Point middle = new Point(0, 0);
+
+            if (FirstNode.Parent.Parameters.PolyLine)
+            {
+                if ((FirstNode.nodePosition == NodePosition.Bottom || FirstNode.nodePosition == NodePosition.Top))
+                {
+                    middle.X = first.X;
+                    middle.Y = second.Y;
+                }
+                if ((FirstNode.nodePosition == NodePosition.Left || FirstNode.nodePosition == NodePosition.Right))
+                {
+                    middle.X = second.X;
+                    middle.Y = first.Y;
+                }
+            }
+
+            double distance = Math.Sqrt(Math.Pow(second.X - middle.X, 2) + Math.Pow(second.Y - middle.Y, 2));
+            return (middle, distance);
+        }
+
+        private Point CalculateNodePosition(Node node)
+        {
+            return new Point(node.position.X + node.Size.Height / 2, node.position.Y + node.Size.Width / 2);
+        }
+
     }
 }

@@ -82,8 +82,9 @@
     <Compile Include="Elements\ElementObject.cs" />
     <Compile Include="Elements\ElementParameter.cs" />
     <Compile Include="Elements\ElementsData\Ellipse.cs" />
+    <Compile Include="Elements\ElementsData\Hexagon.cs" />
     <Compile Include="Elements\ElementsData\IElement.cs" />
-    <Compile Include="Elements\ElementsData\Rhombus.cs" />
+    <Compile Include="Elements\ElementsData\Parallelogram.cs" />
     <Compile Include="Elements\ElementsData\Text.cs" />
     <Compile Include="Elements\Line.cs" />
     <Compile Include="Elements\ElementsData\MyRectangle.cs" />

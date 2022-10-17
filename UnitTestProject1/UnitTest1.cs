@@ -43,9 +43,15 @@ namespace UnitTestProject1
             TestAddElementToCanvas(element);
         }
         [TestMethod]
-        public void CreateRhombus()
+        public void CreateHexagon()
         {
-            var element = CreateElement(new Rhombus());
+            var element = CreateElement(new Hexagon());
+            TestAddElementToCanvas(element);
+        }
+        [TestMethod]
+        public void CreateParallelogram()
+        {
+            var element = CreateElement(new Parallelogram());
             TestAddElementToCanvas(element);
         }
         [TestMethod]

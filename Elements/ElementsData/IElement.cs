@@ -9,6 +9,6 @@ namespace blockSchemeEditor.Elements
 
         ElementParameter Parameters { get; }
 
-        void Draw(Graphics graphics, ElementParameter parameter);
+        void Draw(Graphics graphics, ElementParameter parameters);
     }
 }

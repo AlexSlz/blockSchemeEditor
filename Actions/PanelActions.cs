@@ -104,6 +104,8 @@ namespace blockSchemeEditor.Actions
                     panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5)));
                     break;
                 case ("Double"):
+                    panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5), true));
+                    break;
                 case ("Int32"):
                     panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5), true));
                     break;
@@ -114,13 +116,17 @@ namespace blockSchemeEditor.Actions
                     break;
                 case ("Size"):
                     Size size = (Size)value;
-                    panel.Controls.Add(CreateTextBox(size.Width, new Point(5, label.Size.Height + 5), true, false));
-                    panel.Controls.Add(CreateTextBox(size.Height, new Point(5, label.Size.Height + 40), true, false));
+                    panel.Controls.Add(CreateTextBox(size.Width, new Point(5, label.Size.Height + 5), true));
+                    panel.Controls.Add(CreateTextBox(size.Height, new Point(5, label.Size.Height + 40), true));
                     break;
                 case ("Color"):
                     panel.Controls.Add(CreateColorButton(value, new Point(5, label.Size.Height + 5)));
                     break;
+                case ("Boolean"):
+                    panel.Controls.Add(CreateCheckbox(value, new Point(5, label.Size.Height + 5)));
+                    break;
                 default:
+                    MessageBox.Show(value.GetType().Name);
                     break;
             }
             panel.Location = pos;
@@ -157,7 +163,19 @@ namespace blockSchemeEditor.Actions
             return button;
         }
 
-        private TextBox CreateTextBox(dynamic value, Point pos, bool onlyNum = false, bool needMinus = true)
+        private CheckBox CreateCheckbox(object value, Point pos)
+        {
+            CheckBox checkBox = new CheckBox();
+            checkBox.Text = "";
+            checkBox.Width = 20;
+            checkBox.Height = 20;
+            checkBox.Location = pos;
+            checkBox.Checked = (bool)value;
+            checkBox.CheckedChanged += ControlChanged;
+            return checkBox;
+        }
+
+        private TextBox CreateTextBox(dynamic value, Point pos, bool onlyNum = false)
         {
             TextBox textBox = new TextBox();
             textBox.Text = $"{value}";
@@ -167,16 +185,8 @@ namespace blockSchemeEditor.Actions
             textBox.TextChanged += (object sender, EventArgs e) =>
             {
                 TextBox t = (sender as TextBox);
-                if (onlyNum)
-                {
-                    int max = int.MaxValue / 9999;
-                    double.TryParse(t.Text, out double outValue);
-                    if (outValue >= max)
-                        t.Text = $"{max}";
-                    if (outValue <= -max)
-                        t.Text = $"{-max}";
-                }
-                if (((t.Text != "" || !onlyNum) || t.Text.StartsWith("-")) && (!onlyNum || t.Text.Count(char.IsDigit) > 0))
+
+                if (ValidateText(t.Text, onlyNum))
                 {
                     ControlChanged(this, EventArgs.Empty);
                 }
@@ -185,9 +195,24 @@ namespace blockSchemeEditor.Actions
                 textBox.KeyPress += (object sender, KeyPressEventArgs e) =>
                 {
                     TextBox t = sender as TextBox;
-                    e.Handled = (needMinus) ? checkKey(e) && (t.Text.IndexOf('-') >= 0) : checkKey(e);
+                    e.Handled = checkKey(e);
                 };
             return textBox;
+        }
+
+        private bool ValidateText(string text, bool onlyNum)
+        {
+            bool validate = text != "";
+            if (onlyNum)
+            {
+                int max = int.MaxValue / 9999;
+
+                double.TryParse(text, out double outValue);
+                validate = validate && outValue >= -max;
+                validate = validate && outValue <= max;
+            }
+            validate = validate && (!onlyNum || text.Count(char.IsDigit) > 0);
+            return validate;
         }
 
         private bool checkKey(KeyPressEventArgs e)
@@ -239,6 +264,8 @@ namespace blockSchemeEditor.Actions
                     return new Size(int.Parse(control.Controls[1].Text), int.Parse(control.Controls[2].Text));
                 case ("Color"):
                     return control.Controls[1].BackColor;
+                case ("Boolean"):
+                    return ((CheckBox)(control.Controls[1])).Checked;
                 default:
                     return 0;
             }

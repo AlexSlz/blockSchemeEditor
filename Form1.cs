@@ -20,7 +20,8 @@ namespace blockSchemeEditor
             new MyRectangle(),
             new Ellipse(),
             new RoundedRectangle(),
-            new Rhombus()
+            new Parallelogram(),
+            new Hexagon()
         };
         private Canvas _canvas;
         private FileActions _fileSystem;
@@ -249,5 +250,18 @@ namespace blockSchemeEditor
             _canvas.selectedItem = _canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1]);
         }
 
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            List<string> files = ((string[])e.Data.GetData(DataFormats.FileDrop)).ToList();
+            string currentFile = files.Find(item => item.Contains(".block"));
+            if (currentFile != null)
+                _fileSystem.Import(currentFile);
+        }
+
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Move;
+        }
     }
 }
