@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
 namespace blockSchemeEditor
@@ -192,22 +193,6 @@ namespace blockSchemeEditor
             if (_canvas.selectedItem != null && dialogResult == DialogResult.Yes)
                 _canvas.DeleteElement(_canvas.selectedItem);
         }
-
-        private void pictureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string filename = SaveDialog("Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf");
-            if(filename != null)
-                try
-                {
-                    pictureBox1.Image.Save(filename);
-                    MessageBox.Show($"File created\n{filename}");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-        }
-
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog1.Filter = "blockSheme (.block)|*.block";
@@ -216,28 +201,38 @@ namespace blockSchemeEditor
             string filename = openFileDialog1.FileName;
             _fileSystem.Import(filename);
         }
+        private void pictureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveDialog("Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf", (fileName) =>
+            {
+                _fileSystem.CreateFile(fileName);
+                MessageBox.Show($"File created\n{fileName}");
+            });
+        }
 
         private void fileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string filename = SaveDialog("blockSheme (.block)|*.block");
-            if (filename != null)
+            SaveDialog("blockSheme (.block)|*.block", (fileName) =>
+            {
+                _fileSystem.CreateFile(fileName);
+                MessageBox.Show($"File created\n{fileName}");
+            });
+        }
+
+        private void SaveDialog(string filter, Action<string> callBack)
+        {
+            saveFileDialog1.Filter = filter;
+            if (saveFileDialog1.ShowDialog() != DialogResult.Cancel)
+            {
                 try
                 {
-                    _fileSystem.CreateFile(filename);
-                    MessageBox.Show($"File created\n{filename}");
+                    callBack(saveFileDialog1.FileName);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
                 }
-        }
-
-        private string SaveDialog(string filter)
-        {
-            saveFileDialog1.Filter = filter;
-            if (saveFileDialog1.ShowDialog() == DialogResult.Cancel)
-                return null;
-            return saveFileDialog1.FileName;
+            }
         }
 
         private void UpdateElementList(object sender, EventArgs e)

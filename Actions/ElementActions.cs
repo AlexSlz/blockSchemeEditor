@@ -25,9 +25,9 @@ namespace blockSchemeEditor
         }
         public static void DeleteNode(Canvas canvas, Node node)
         {
-            var temp = canvas.Lines.FindAll(line => line.FirstNode == node || line.SecondNode == node);
+            var currentLines = canvas.Lines.FindAll(line => line.FirstNode == node || line.SecondNode == node);
 
-            temp.ForEach(line =>
+            currentLines.ForEach(line =>
             {
                 canvas.Lines.Remove(line);
             });
@@ -45,17 +45,5 @@ namespace blockSchemeEditor
                 node.Move(element.Parameters.Position, element.Parameters.CustomSize);
             });
         }
-
-        public static bool DetectCollision(this Size size, Point mousePos, int offset = 0)
-        {
-            bool a = size.Width <= mousePos.X + offset;
-            bool b = size.Width >= mousePos.X - offset;
-            bool c = size.Height <= mousePos.Y + offset;
-            bool d = size.Height >= mousePos.Y - offset;
-
-            MessageBox.Show($"{a} | {b} | {c} | {d}");
-            return false;
-        }
-
     }
 }

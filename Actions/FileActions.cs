@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+using System.Windows.Forms;
 
 namespace blockSchemeEditor
 {
@@ -20,25 +20,39 @@ namespace blockSchemeEditor
         public void CreateFile(string path)
         {
             save = new SaveElement();
-            _canvas.Elements.ForEach(element =>
-            {
-                save.elements.Add(new SaveElement.StructElement { Id = element.Id, parameter = element.Parameters, 
-                                 elementData = element.elementData.Name});
-            });
-            _canvas.Lines.ForEach(line =>
-            {
-                save.lines.Add(new SaveElement.StructLine { firstNodeId = line.FirstNode.Parent.Id, 
-                                                            firstNodePos = line.FirstNode.nodePosition.ToString(), 
-                                                            secondNodeId = line.SecondNode.Parent.Id, 
-                                                            secondNodePos = line.SecondNode.nodePosition.ToString() });
-            });
-
+            ExportElements();
+            ExportLines();
 
             using(FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 _formatter.Serialize(fs, save);
                 fs.Close();
             }
+        }
+        private void ExportElements()
+        {
+            _canvas.Elements.ForEach(element =>
+            {
+                save.elements.Add(new SaveElement.StructElement
+                {
+                    Id = element.Id,
+                    parameter = element.Parameters,
+                    elementData = element.elementData.Name
+                });
+            });
+        }
+        private void ExportLines()
+        {
+            _canvas.Lines.ForEach(line =>
+            {
+                save.lines.Add(new SaveElement.StructLine
+                {
+                    firstNodeId = line.FirstNode.Parent.Id,
+                    firstNodePos = line.FirstNode.nodePosition.ToString(),
+                    secondNodeId = line.SecondNode.Parent.Id,
+                    secondNodePos = line.SecondNode.nodePosition.ToString()
+                });
+            });
         }
 
         public void Import(string path)
@@ -62,7 +76,7 @@ namespace blockSchemeEditor
         {
             save.elements.ForEach(item =>
             {
-                _canvas.AddElement(new ElementObject(item.parameter.Position, Form1.elements.Find(element => item.elementData.Contains(element.Name)), item.Id, item.parameter));
+                _canvas.AddElement(new ElementObject(item.parameter.Position, Form1.elements.Find(element => item.elementData == element.Name), item.Id, item.parameter));
             });
         }
 

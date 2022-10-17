@@ -15,13 +15,24 @@ namespace blockSchemeEditor.Elements
         private int nodeOffset = 7;
         public IElement elementData { get; private set; }
 
-        Font drawFont = new Font("Microsoft Sans Serif", 14);
-        public ElementObject(Point startPos ,IElement elementData, string id = "", ElementParameter parameter = null)
+        public ElementObject(Point startPos, IElement elementData)
         {
-            Id = (id == "") ? Guid.NewGuid().ToString("N") : id;
+            Id = Guid.NewGuid().ToString("N");
             this.elementData = elementData;
-            Parameters = (parameter != null) ? parameter : elementData.Parameters;
+            Parameters = elementData.Parameters;
             Parameters.Position = startPos;
+            InitNodes();
+        }
+        public ElementObject(Point startPos ,IElement elementData, string id, ElementParameter parameter) : this(startPos, elementData)
+        {
+            Id = id;
+            this.elementData = elementData;
+            Parameters = parameter;
+            InitNodes();
+        }
+
+        private void InitNodes()
+        {
             Nodes = new List<Node>() {
                 new Node(NodePosition.Left, this),
                 new Node(NodePosition.Right, this),
@@ -33,21 +44,28 @@ namespace blockSchemeEditor.Elements
                 item.Move(Parameters.Position, Parameters.CustomSize);
             });
         }
-        SolidBrush TextClr = new SolidBrush(Color.Black);
+
         public void DrawElement(Graphics g, bool selected = false)
         {
-            StringFormat sf = new StringFormat();
-            sf.LineAlignment = StringAlignment.Center;
-            sf.Alignment = StringAlignment.Center;
             elementData.Draw(g, Parameters);
-            if(elementData.Name != "Text")
-            g.DrawString((Parameters.Text == "") ? elementData.Name : Parameters.Text, drawFont, TextClr,
-                new Rectangle(Parameters.Position, Parameters.CustomSize), sf);
+            if (elementData.Name != "Text")
+                DrawText(g);
 
             if (selected)
                 DrawFrame(g);
         }
-
+        private void DrawText(Graphics g)
+        {
+            using (StringFormat sf = new StringFormat())
+            using (SolidBrush TextClr = new SolidBrush(Color.Black))
+            using (Font drawFont = new Font("Microsoft Sans Serif", 14))
+            {
+                sf.LineAlignment = StringAlignment.Center;
+                sf.Alignment = StringAlignment.Center;
+                g.DrawString((Parameters.Text == "") ? elementData.Name : Parameters.Text, drawFont, TextClr,
+                new Rectangle(Parameters.Position, Parameters.CustomSize), sf);
+            }
+        }
         private void DrawFrame(Graphics g)
         {
             using(Pen pen = new Pen(Color.Aqua, 3))

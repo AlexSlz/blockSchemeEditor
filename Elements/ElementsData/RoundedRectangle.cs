@@ -3,7 +3,6 @@ using System.Windows.Forms;
 
 namespace blockSchemeEditor.Elements
 {
-
     internal class RoundedRectangle : IElement
     {
         public string Name => "Rounded Rectangle";
