@@ -96,6 +96,7 @@ namespace blockSchemeEditor
         {
             Elements = new List<ElementObject>();
             Lines = new List<Line>();
+            OnElementsChanged();
         }
 
         public void ResetSelected()
