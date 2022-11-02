@@ -135,6 +135,7 @@
             // 
             // panel1
             // 
+            this.panel1.AutoScroll = true;
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel1.Location = new System.Drawing.Point(584, 0);
             this.panel1.Name = "panel1";
@@ -161,6 +162,7 @@
             this.listBox2.Name = "listBox2";
             this.listBox2.Size = new System.Drawing.Size(200, 229);
             this.listBox2.TabIndex = 3;
+            this.listBox2.Click += new System.EventHandler(this.listBox2_Click);
             this.listBox2.DoubleClick += new System.EventHandler(this.listBox2_DoubleClick);
             // 
             // Form1

@@ -151,14 +151,20 @@ namespace blockSchemeEditor
             }
         }
 
-        private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void OpenParametersPanel(MouseEventArgs e = null)
         {
-            _canvas.Click(new Point(e.X, e.Y));
+            if(e != null)
+                _canvas.Click(new Point(e.X, e.Y));
             if (_canvas.selectedItem != null)
             {
                 panel1.Show();
                 _panelActions.InitPanel(_canvas.selectedItem.Parameters);
             }
+        }
+
+        private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            OpenParametersPanel(e);
         }
 
         Stopwatch stopwatch = new Stopwatch();
@@ -172,7 +178,7 @@ namespace blockSchemeEditor
                 pictureBox1.Image?.Dispose();
                 pictureBox1.Image = bmp;
                 double elapsedSec = (double)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-                Text = $"A - {elapsedSec * 1000:0.00} ms ({1 / elapsedSec:0.00} FPS)";
+                Text = $"blockShemeEditor - {elapsedSec * 1000:0.00} ms ({1 / elapsedSec:0.00} FPS)";
             }
         }
 
@@ -246,10 +252,14 @@ namespace blockSchemeEditor
 
         private void listBox2_DoubleClick(object sender, EventArgs e)
         {
-            if(listBox2.Items.Count > 0)
-            _canvas.selectedItem = _canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1]);
+            if (listBox2.Items.Count > 0)
+                OpenParametersPanel();
         }
-
+        private void listBox2_Click(object sender, EventArgs e)
+        {
+            if (listBox2.Items.Count > 0)
+                _canvas.selectedItem = _canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1]);
+        }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {

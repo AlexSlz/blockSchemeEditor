@@ -71,7 +71,7 @@ namespace blockSchemeEditor
             }
         }
 
-
+        
         private void LoadElements()
         {
             save.elements.ForEach(item =>
