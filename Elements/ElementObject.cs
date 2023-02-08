@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace blockSchemeEditor.Elements
 {
@@ -14,6 +13,8 @@ namespace blockSchemeEditor.Elements
         public List<Node> Nodes;
         private int nodeOffset = 7;
         public IElement elementData { get; private set; }
+
+        public Point lastPosition;
 
         public ElementObject(Point startPos, IElement elementData)
         {
@@ -28,7 +29,6 @@ namespace blockSchemeEditor.Elements
             Id = id;
             this.elementData = elementData;
             Parameters = parameter;
-            InitNodes();
         }
 
         private void InitNodes()
@@ -49,12 +49,12 @@ namespace blockSchemeEditor.Elements
         {
             elementData.Draw(g, Parameters);
             if (elementData.Name != "Text")
-                DrawText(g);
+                DrawTextOnElement(g);
 
             if (selected)
                 DrawFrame(g);
         }
-        private void DrawText(Graphics g)
+        private void DrawTextOnElement(Graphics g)
         {
             using (StringFormat sf = new StringFormat())
             using (SolidBrush TextClr = new SolidBrush(Color.Black))

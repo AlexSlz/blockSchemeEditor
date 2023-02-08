@@ -54,34 +54,8 @@ namespace blockSchemeEditor
                 };
                 contextMenuStrip1.Items.Add(deleteRegEditButton);
             }
-            //pictureBox1.MouseWheel += PictureBox1_MouseWheel;
+
         }
-
-/*        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (e.Delta < 0)
-            {
-                ZoomIn();
-            }
-            else
-            {
-                ZoomOut();
-            }
-
-            label1.Text = _canvas.Zoom + "";
-        }
-
-        private void ZoomIn()
-        {
-            if (_canvas.Zoom > 1f)
-                _canvas.Zoom -= 0.1f;
-        }
-
-        private void ZoomOut()
-        {
-            if (_canvas.Zoom < 10f)
-                _canvas.Zoom += 0.1f;
-        }*/
 
         private void InitListBox()
         {
@@ -93,28 +67,29 @@ namespace blockSchemeEditor
 
         private bool _mouseDownOnCanvas = false;
         private Point _oldPos;
-        private Point _elementOldPos;
+        private List<Point> _elementsOldPos = new List<Point>();
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            _canvas.ResetSelected();
-            listBox2.ClearSelected();
-            panel1.Hide();
-            panel1.Controls.Clear();
             _oldPos = e.Location;
             _mouseDownOnCanvas = true;
-            _canvas.Click(new Point(e.X, e.Y));
 
-            if (_canvas.selectedItem != null)
-                _elementOldPos = _canvas.selectedItem.Parameters.Position;
-            
+            var detect = _canvas.Click(new Point(e.X, e.Y));
+
+            if (!detect)
+            {
+                _canvas.ClearSelection();
+                listBox2.ClearSelected();
+                panel1.Hide();
+                panel1.Controls.Clear();
+            }
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             _canvas.OnMove(e.Location);
-            if (_mouseDownOnCanvas && _canvas.selectedItem != null)
+            if (_mouseDownOnCanvas && _canvas.selectedItems.Count > 0)
             {
                 Cursor.Current = Cursors.SizeAll;
-                _canvas.selectedItem.Move(e.Location, _oldPos, _elementOldPos);
+                _canvas.selectedItems.Move(e.Location, _oldPos);
             }
 
             if (_mouseDownOnCanvas && _canvas.selectedNode != null)
@@ -151,20 +126,23 @@ namespace blockSchemeEditor
             }
         }
 
-        private void OpenParametersPanel(MouseEventArgs e = null)
+        private void OpenParametersPanel()
         {
-            if(e != null)
-                _canvas.Click(new Point(e.X, e.Y));
-            if (_canvas.selectedItem != null)
+            if (panel1.Visible)
+            {
+                panel1.Hide();
+                panel1.Controls.Clear();
+            }
+            if (_canvas.lastSelectedElement != null)
             {
                 panel1.Show();
-                _panelActions.InitPanel(_canvas.selectedItem.Parameters);
+                _panelActions.InitPanel(_canvas.lastSelectedElement.Parameters);
             }
         }
 
         private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            OpenParametersPanel(e);
+            OpenParametersPanel();
         }
 
         Stopwatch stopwatch = new Stopwatch();
@@ -184,21 +162,27 @@ namespace blockSchemeEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         { 
-            string selectedItem = "All";
-            if (_canvas.selectedItem != null)
-                selectedItem = _canvas.selectedItem.Parameters.Text;
-            if (_canvas.selectedNode != null)
-                selectedItem = $"Node{_canvas.selectedNode.nodePosition} Line";
-            
-            DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItem}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
+            string selectedItemText = "All";
+            List<ElementObject> elementTODelete = _canvas.selectedItems;
 
-            if (_canvas.selectedNode == null && _canvas.selectedItem == null && dialogResult == DialogResult.Yes)
+            if (elementTODelete.Count > 0)
+                selectedItemText = elementTODelete.Count + " Elements";
+            if (_canvas.selectedNode != null)
+                selectedItemText = $"Node{_canvas.selectedNode.nodePosition} Line";
+            
+            DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItemText}? {elementTODelete.Count} | {_canvas.selectedNode == null}", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
+
+            if (_canvas.selectedNode == null && elementTODelete.Count <= 0 && dialogResult == DialogResult.Yes)
                 _canvas.ClearElements();
 
             if (_canvas.selectedNode != null && dialogResult == DialogResult.Yes)
                 ElementActions.DeleteNode(_canvas, _canvas.selectedNode);
-            if (_canvas.selectedItem != null && dialogResult == DialogResult.Yes)
-                _canvas.DeleteElement(_canvas.selectedItem);
+            if (elementTODelete != null && dialogResult == DialogResult.Yes)
+                _canvas.DeleteElements(elementTODelete);
+
+
+            panel1.Hide();
+            panel1.Controls.Clear();
         }
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -258,7 +242,7 @@ namespace blockSchemeEditor
         private void listBox2_Click(object sender, EventArgs e)
         {
             if (listBox2.Items.Count > 0)
-                _canvas.selectedItem = _canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1]);
+                _canvas.selectedItems = new List<ElementObject>() { (_canvas.Elements.Find(item => item.Id == listBox2.Items[listBox2.SelectedIndex].ToString().Split('-')[1])) };
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)

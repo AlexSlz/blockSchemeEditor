@@ -11,8 +11,7 @@ namespace blockSchemeEditor.Elements
         public ElementParameter() { }
 
         public string Text;
-        private int _index = 0;
-        public int Index { get { return _index; } set { _index = value; } }
+        public int Index = 0;
         public bool PolyLine = true;
         public Point Position;
         public Size CustomSize;

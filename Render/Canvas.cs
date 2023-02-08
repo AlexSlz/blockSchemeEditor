@@ -13,7 +13,8 @@ namespace blockSchemeEditor
         public List<ElementObject> Elements = new List<ElementObject>();
         public event System.EventHandler ElementsChanged;
         public List<Line> Lines = new List<Line>();
-        public ElementObject selectedItem { get; set; }
+        public List<ElementObject> selectedItems = new List<ElementObject>();
+        public ElementObject lastSelectedElement => (selectedItems.Count > 0) ? selectedItems.First() : null;
         public Node selectedNode { get; set; }
 
         public virtual void OnElementsChanged()
@@ -21,24 +22,41 @@ namespace blockSchemeEditor
             if (ElementsChanged != null) ElementsChanged(this, EventArgs.Empty);
         }
 
-        public void Click(Point p)
+        public bool Click(Point p)
         {
             var temp = Elements.FindAll(item =>
             {
+                item.lastPosition = item.Parameters.Position;
                 return item.DetectElementCollision(p);
             });
 
             if (temp.Count > 0)
-                selectedItem = temp.Last();
-
-            if (selectedItem != null)
-                return;
+            {
+                if (selectedItems.Find(item => item == temp.Last()) == null)
+                {
+                    if (Control.ModifierKeys == Keys.Shift && selectedItems.Count > 0)
+                    {
+                        selectedItems.Add(temp.Last());
+                    }
+                    else
+                    {
+                        selectedItems = new List<ElementObject> { temp.Last() };
+                    }
+                }
+            }
 
             foreach (var item in Elements)
             {
-                if (selectedNode == null)
-                    selectedNode = item.DetectNodeCollision(mousePos);
+                selectedNode = item.DetectNodeCollision(mousePos);
+                if (selectedNode != null)
+                {
+                    selectedItems.Clear();
+                    break;
+                }
+                
             }
+
+            return temp.Count > 0 || selectedNode != null;
         }
         private Node secondNode = null;
         public void OnMouseUp()
@@ -61,7 +79,9 @@ namespace blockSchemeEditor
                         thisElement = true;
                 });
                 if (secondNode == null && !thisElement)
+                {
                     secondNode = item.DetectNodeCollision(mousePos);
+                }
             }
         }
 
@@ -81,7 +101,8 @@ namespace blockSchemeEditor
                 gfx.Clear(color);
                 Elements.ForEach(item =>
                 {
-                    item.DrawElement(gfx, item == selectedItem);
+                    var find = selectedItems.Find(i => item == i) != null;
+                    item.DrawElement(gfx, find);
                     item.DrawNodes(mousePos, gfx);
                 });
                 Lines.ForEach(line =>
@@ -99,12 +120,14 @@ namespace blockSchemeEditor
             OnElementsChanged();
         }
 
-        public void ResetSelected()
+        public void ClearSelection()
         {
-            selectedItem = null;
+            selectedItems.Clear();
             selectedNode = null;
             secondNode = null;
         }
+
+
         public void Order()
         {
             Elements = Elements.OrderBy(x => x.Parameters.Index).ToList();

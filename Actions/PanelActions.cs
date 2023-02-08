@@ -222,17 +222,17 @@ namespace blockSchemeEditor.Actions
 
         private void ControlChanged(object sender, EventArgs e)
         {
-            _canvas.selectedItem?.Parameters.GetType().GetFields().ToList().ForEach(item => {
+            _canvas.lastSelectedElement?.Parameters.GetType().GetFields().ToList().ForEach(item => {
                 GetControl(item.Name, (control) =>
                 {
-                    item.SetValue(_canvas.selectedItem.Parameters, GetValue(item.FieldType.Name, control));
+                    item.SetValue(_canvas.lastSelectedElement.Parameters, GetValue(item.FieldType.Name, control));
                 });
             });
-            _canvas.selectedItem?.Parameters.GetType().GetProperties().ToList().ForEach(item =>
+            _canvas.lastSelectedElement?.Parameters.GetType().GetProperties().ToList().ForEach(item =>
             {
                 GetControl(item.Name, (control) =>
                 {
-                    item.SetValue(_canvas.selectedItem.Parameters, GetValue(item.PropertyType.Name, control));
+                    item.SetValue(_canvas.lastSelectedElement.Parameters, GetValue(item.PropertyType.Name, control));
                 });
             });
         }

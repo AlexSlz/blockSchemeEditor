@@ -8,6 +8,15 @@ namespace blockSchemeEditor
     internal static class ElementActions
     {
 
+        public static void DeleteElements(this Canvas canvas, List<ElementObject> elements)
+        {
+            elements.ForEach(element =>
+            {
+                canvas.DeleteElement(element);
+            });
+            canvas.OnElementsChanged();
+        }
+
         public static void DeleteElement(this Canvas canvas, ElementObject element)
         {
             element.Nodes.ForEach(node =>
@@ -15,6 +24,7 @@ namespace blockSchemeEditor
                 DeleteNode(canvas, node);
             });
             canvas.Elements.Remove(element);
+
             canvas.OnElementsChanged();
         }
 
@@ -32,12 +42,22 @@ namespace blockSchemeEditor
                 canvas.Lines.Remove(line);
             });
         }
-        public static void Move(this ElementObject element, Point pos, Point oldPos, Point elementOldPos)
+        public static void Move(this ElementObject element, Point pos, Point oldPos)
         {
-            element.Parameters.Position.X = elementOldPos.X + (pos.X - oldPos.X);
-            element.Parameters.Position.Y = elementOldPos.Y + (pos.Y - oldPos.Y);
+            element.Parameters.Position.X = element.lastPosition.X + (pos.X - oldPos.X);
+            element.Parameters.Position.Y = element.lastPosition.Y + (pos.Y - oldPos.Y);
             MoveNodes(element);
         }
+
+        public static void Move(this List<ElementObject> elements, Point pos, Point oldPos)
+        {
+            elements.ForEach(element =>
+            {
+
+                element.Move(pos, oldPos);
+            });
+        }
+
         private static void MoveNodes(ElementObject element)
         {
             element.Nodes.ForEach(node =>

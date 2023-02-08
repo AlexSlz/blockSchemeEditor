@@ -75,7 +75,7 @@ namespace UnitTestProject1
         public void TestMoveElement()
         {
             Assert.AreEqual(TestElement.Parameters.Position, new Point(0, 0));
-            TestElement.Move(new Point(10, 10), new Point(0,0), TestElement.Parameters.Position);
+            TestElement.Move(new Point(10, 10), new Point(0,0));
             Assert.AreEqual(TestElement.Parameters.Position, new Point(10, 10));
         }
         [TestMethod]
