@@ -14,7 +14,7 @@ namespace blockSchemeEditor
         public event System.EventHandler ElementsChanged;
         public List<Line> Lines = new List<Line>();
         public List<ElementObject> selectedItems = new List<ElementObject>();
-        public ElementObject lastSelectedElement => (selectedItems.Count > 0) ? selectedItems.First() : null;
+        public ElementObject lastSelectedElement = null;
         public Node selectedNode { get; set; }
 
         public virtual void OnElementsChanged()
@@ -32,32 +32,49 @@ namespace blockSchemeEditor
 
             if (temp.Count > 0)
             {
-                if (selectedItems.Find(item => item == temp.Last()) == null)
-                {
-                    if (Control.ModifierKeys == Keys.Shift && selectedItems.Count > 0)
-                    {
-                        selectedItems.Add(temp.Last());
-                    }
-                    else
-                    {
-                        selectedItems = new List<ElementObject> { temp.Last() };
-                    }
-                }
+                SelectElement(temp.Last());
             }
 
+            SelectNode();
+
+            return temp.Count > 0 || selectedNode != null;
+        }
+
+        private void SelectElement(ElementObject element)
+        {
+            lastSelectedElement = element;
+            var lastElement = selectedItems.Find(item => item == element);
+            if (lastElement == null)
+            {
+                if (Control.ModifierKeys == Keys.Shift && selectedItems.Count > 0)
+                {
+                    selectedItems.Add(element);
+                }
+                else
+                {
+                    selectedItems = new List<ElementObject> { element };
+                }
+            }
+            else
+            {
+                lastSelectedElement = lastElement;
+            }
+        }
+
+        private bool SelectNode()
+        {
             foreach (var item in Elements)
             {
                 selectedNode = item.DetectNodeCollision(mousePos);
                 if (selectedNode != null)
                 {
                     selectedItems.Clear();
-                    break;
+                    return true;
                 }
-                
             }
-
-            return temp.Count > 0 || selectedNode != null;
+            return false;
         }
+
         private Node secondNode = null;
         public void OnMouseUp()
         {   
@@ -123,6 +140,7 @@ namespace blockSchemeEditor
         public void ClearSelection()
         {
             selectedItems.Clear();
+            lastSelectedElement = null;
             selectedNode = null;
             secondNode = null;
         }

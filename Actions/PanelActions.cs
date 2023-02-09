@@ -1,14 +1,9 @@
 ﻿using blockSchemeEditor.Elements;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using Label = System.Windows.Forms.Label;
 using TextBox = System.Windows.Forms.TextBox;
@@ -24,20 +19,21 @@ namespace blockSchemeEditor.Actions
             _panel = panel;
             _canvas = canvas;
         }
-
-        public void InitPanel(ElementParameter parameter)
+        private ElementObject activeElement;
+        public void InitPanel(ElementObject element)
         {
+            activeElement = element;
             int y = 10;
 
-            parameter.GetType().GetFields().ToList().ForEach(item =>
+            element.Parameters.GetType().GetFields().ToList().ForEach(item =>
             {
-                int temp = Init(item, parameter, y);
+                int temp = Init(item, element.Parameters, y);
                 if(temp != -1)
                     y = temp;
             });
-            parameter.GetType().GetProperties().ToList().ForEach(item =>
+            element.Parameters.GetType().GetProperties().ToList().ForEach(item =>
             {
-                int temp = Init(item, parameter, y);
+                int temp = Init(item, element.Parameters, y);
                 if (temp != -1)
                     y = temp;
             });
@@ -73,17 +69,10 @@ namespace blockSchemeEditor.Actions
             if (!Valid(item.Name, value, parameter))
                 return -1;
 
-/*            var customParams = (CustomParams[])item.GetCustomAttributes(typeof(CustomParams), false);
-            if (customParams.Length > 0)
-            {
-                double.TryParse(value.ToString(), out double res);
-                hide = customParams[0].Optional && res == int.MinValue;
-            }*/
+            Panel tempPanel = CreatePanel(item.Name, value, new Point(0, y));
+            _panel.Controls.Add(tempPanel);
+            y += tempPanel.Height;
 
-                Panel tempPanel = CreatePanel(item.Name, value, new Point(0, y));
-                _panel.Controls.Add(tempPanel);
-                y += tempPanel.Height;
-            
             return y;
         }
 
@@ -104,20 +93,20 @@ namespace blockSchemeEditor.Actions
                     panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5)));
                     break;
                 case ("Double"):
-                    panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5), true));
+                    panel.Controls.Add(CreateNumeric(value, new Point(5, label.Size.Height + 5), 3, -100));
                     break;
                 case ("Int32"):
-                    panel.Controls.Add(CreateTextBox(value, new Point(5, label.Size.Height + 5), true));
+                    panel.Controls.Add(CreateNumeric(value, new Point(5, label.Size.Height + 5)));
                     break;
                 case ("Point"):
                     Point point = (Point)value;
-                    panel.Controls.Add(CreateTextBox(point.X, new Point(5, label.Size.Height + 5), true));
-                    panel.Controls.Add(CreateTextBox(point.Y, new Point(5, label.Size.Height + 40), true));
+                    panel.Controls.Add(CreateNumeric(point.X, new Point(5, label.Size.Height + 5)));
+                    panel.Controls.Add(CreateNumeric(point.Y, new Point(5, label.Size.Height + 40)));
                     break;
                 case ("Size"):
                     Size size = (Size)value;
-                    panel.Controls.Add(CreateTextBox(size.Width, new Point(5, label.Size.Height + 5), true));
-                    panel.Controls.Add(CreateTextBox(size.Height, new Point(5, label.Size.Height + 40), true));
+                    panel.Controls.Add(CreateNumeric(size.Width, new Point(5, label.Size.Height + 5)));
+                    panel.Controls.Add(CreateNumeric(size.Height, new Point(5, label.Size.Height + 40)));
                     break;
                 case ("Color"):
                     panel.Controls.Add(CreateColorButton(value, new Point(5, label.Size.Height + 5)));
@@ -200,6 +189,27 @@ namespace blockSchemeEditor.Actions
             return textBox;
         }
 
+
+        private NumericUpDown CreateNumeric(dynamic value, Point pos, int decimalPlaces = 0, int minimum = 0)
+        {
+            NumericUpDown numeric = new NumericUpDown();
+
+            numeric.Location = pos;
+            numeric.Maximum = 9999;
+            numeric.Width = 150;
+            numeric.DecimalPlaces = decimalPlaces;
+            numeric.Minimum = minimum;
+
+            numeric.Value = decimal.Parse(value.ToString());
+
+            numeric.ValueChanged += (object sender, EventArgs e) =>
+            {
+                ControlChanged(this, EventArgs.Empty);
+            };
+
+            return numeric;
+        }
+
         private bool ValidateText(string text, bool onlyNum)
         {
             bool validate = text != "";
@@ -222,17 +232,17 @@ namespace blockSchemeEditor.Actions
 
         private void ControlChanged(object sender, EventArgs e)
         {
-            _canvas.lastSelectedElement?.Parameters.GetType().GetFields().ToList().ForEach(item => {
+            activeElement?.Parameters.GetType().GetFields().ToList().ForEach(item => {
                 GetControl(item.Name, (control) =>
                 {
-                    item.SetValue(_canvas.lastSelectedElement.Parameters, GetValue(item.FieldType.Name, control));
+                    item.SetValue(activeElement.Parameters, GetValue(item.FieldType.Name, control));
                 });
             });
-            _canvas.lastSelectedElement?.Parameters.GetType().GetProperties().ToList().ForEach(item =>
+            activeElement?.Parameters.GetType().GetProperties().ToList().ForEach(item =>
             {
                 GetControl(item.Name, (control) =>
                 {
-                    item.SetValue(_canvas.lastSelectedElement.Parameters, GetValue(item.PropertyType.Name, control));
+                    item.SetValue(activeElement.Parameters, GetValue(item.PropertyType.Name, control));
                 });
             });
         }
@@ -270,16 +280,5 @@ namespace blockSchemeEditor.Actions
                     return 0;
             }
         }
-
-/*        private CustomParams GetCustomParams(FieldInfo item)
-        {
-            var customParams = (CustomParams[])item.GetCustomAttributes(typeof(CustomParams), false);
-            if (customParams.Length > 0)
-            {
-                return customParams[0];
-            }
-            return null;
-        }*/
-
     }
 }

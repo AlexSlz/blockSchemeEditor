@@ -136,7 +136,7 @@ namespace blockSchemeEditor
             if (_canvas.lastSelectedElement != null)
             {
                 panel1.Show();
-                _panelActions.InitPanel(_canvas.lastSelectedElement.Parameters);
+                _panelActions.InitPanel(_canvas.lastSelectedElement);
             }
         }
 
@@ -170,7 +170,7 @@ namespace blockSchemeEditor
             if (_canvas.selectedNode != null)
                 selectedItemText = $"Node{_canvas.selectedNode.nodePosition} Line";
             
-            DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItemText}? {elementTODelete.Count} | {_canvas.selectedNode == null}", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
+            DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItemText}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
 
             if (_canvas.selectedNode == null && elementTODelete.Count <= 0 && dialogResult == DialogResult.Yes)
                 _canvas.ClearElements();
