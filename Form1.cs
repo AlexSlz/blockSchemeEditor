@@ -34,7 +34,7 @@ namespace blockSchemeEditor
 
             _canvas = new Canvas();
             _fileSystem = new FileActions(_canvas);
-            _panelActions = new PanelActions(panel1, _canvas);
+            _panelActions = new PanelActions(panel1);
             InitListBox();
 
             if (args.Length > 0)
@@ -136,7 +136,11 @@ namespace blockSchemeEditor
             if (_canvas.lastSelectedElement != null)
             {
                 panel1.Show();
-                _panelActions.InitPanel(_canvas.lastSelectedElement);
+                _panelActions.DisplayElementOnPanel(_canvas.lastSelectedElement);
+            }
+            else {
+                panel1.Show();
+                _panelActions.DisplaySettingsPanel(pictureBox1);
             }
         }
 
@@ -179,7 +183,6 @@ namespace blockSchemeEditor
                 ElementActions.DeleteNode(_canvas, _canvas.selectedNode);
             if (elementTODelete != null && dialogResult == DialogResult.Yes)
                 _canvas.DeleteElements(elementTODelete);
-
 
             panel1.Hide();
             panel1.Controls.Clear();

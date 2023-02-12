@@ -81,6 +81,7 @@ namespace blockSchemeEditor
             if (selectedNode != null && secondNode != null)
             {
                 Lines.Add(new Line(selectedNode, secondNode));
+                ClearSelection();
             }
         }
 

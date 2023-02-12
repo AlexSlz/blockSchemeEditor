@@ -93,6 +93,8 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Actions\FileActions.cs" />
+    <Compile Include="Render\MyPanel\PanelElements.cs" />
+    <Compile Include="Render\MyPanel\PanelSection.cs" />
     <Compile Include="Render\Node.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
