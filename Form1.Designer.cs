@@ -44,7 +44,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.listBox2 = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -164,16 +163,6 @@
             this.listBox2.Size = new System.Drawing.Size(200, 229);
             this.listBox2.TabIndex = 3;
             this.listBox2.Click += new System.EventHandler(this.listBox2_Click);
-            this.listBox2.DoubleClick += new System.EventHandler(this.listBox2_DoubleClick);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(354, 418);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "label1";
             // 
             // Form1
             // 
@@ -181,7 +170,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
@@ -195,7 +183,6 @@
             this.contextMenuStrip1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -214,7 +201,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ListBox listBox2;
-        private System.Windows.Forms.Label label1;
     }
 }
 

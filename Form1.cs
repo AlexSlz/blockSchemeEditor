@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace blockSchemeEditor
 {
@@ -21,7 +20,10 @@ namespace blockSchemeEditor
             new Ellipse(),
             new RoundedRectangle(),
             new Parallelogram(),
-            new Hexagon()
+            new Hexagon(),
+            new Actor(),
+            new Triangle(),
+            new Star(),
         };
         private Canvas _canvas;
         private FileActions _fileSystem;
@@ -40,6 +42,7 @@ namespace blockSchemeEditor
             if (args.Length > 0)
             {
                 _fileSystem.Import(args[0]);
+                this.FormClosed += Form1_FormClosed;
             }
 
 
@@ -55,6 +58,23 @@ namespace blockSchemeEditor
                 contextMenuStrip1.Items.Add(deleteRegEditButton);
             }
 
+            _canvas.Elements.Add(new ElementObject(new Point(500, 200), new Star()));
+
+
+            /*            Random rand = new Random();
+                        for (int i = 0; i < 10; i++)
+                        {
+                            _canvas.Elements.Add(new ElementObject(new Point(rand.Next(200, 500), rand.Next(200, 500)), elements[rand.Next(0, elements.Count - 1)]));
+                        }*/
+
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show($"Save File, {_fileSystem.FileName}?", "?", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
+
+            if (dialogResult == DialogResult.Yes)
+                _fileSystem.CreateFile(_fileSystem.FilePath);
         }
 
         private void InitListBox()
@@ -136,7 +156,8 @@ namespace blockSchemeEditor
             if (_canvas.lastSelectedElement != null)
             {
                 panel1.Show();
-                _panelActions.DisplayElementOnPanel(_canvas.lastSelectedElement);
+                //_panelActions.DisplayElementOnPanel(_canvas.lastSelectedElement);
+                _panelActions.DisplayElementsOnPanel(_canvas.selectedItems);
             }
             else {
                 panel1.Show();
@@ -160,7 +181,7 @@ namespace blockSchemeEditor
                 pictureBox1.Image?.Dispose();
                 pictureBox1.Image = bmp;
                 double elapsedSec = (double)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-                Text = $"blockShemeEditor - {elapsedSec * 1000:0.00} ms ({1 / elapsedSec:0.00} FPS)";
+                Text = $"{((_fileSystem.FilePath == null) ? "blockShemeEditor" : _fileSystem.FileName)} - {elapsedSec * 1000:0.00} ms ({1 / elapsedSec:0.00} FPS)";
             }
         }
 
@@ -194,12 +215,28 @@ namespace blockSchemeEditor
                 return;
             string filename = openFileDialog1.FileName;
             _fileSystem.Import(filename);
+            this.FormClosed += Form1_FormClosed;
         }
         private void pictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveDialog("Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf", (fileName) =>
             {
-                _fileSystem.CreateFile(fileName);
+                Rectangle crop = new Rectangle(_canvas.Elements[0].Parameters.Position, _canvas.Elements[0].Parameters.CustomSize);
+
+                _canvas.Elements.ForEach(element =>
+                {
+                    crop.X = Math.Min(crop.X, element.Parameters.Position.X);
+                    crop.Y = Math.Min(crop.Y, element.Parameters.Position.Y);
+                    crop.Width = Math.Max(crop.Width, element.Parameters.Position.X);
+                    crop.Height = Math.Max(crop.Height, element.Parameters.Position.Y);
+                });
+
+                var result = new Bitmap(crop.Width, crop.Height);
+                using (var gr = Graphics.FromImage(result))
+                {
+                    gr.DrawImage(pictureBox1.Image, new Rectangle(0, 0, crop.Width, crop.Height), crop, GraphicsUnit.Pixel);
+                }
+                result.Save(fileName);
                 MessageBox.Show($"File created\n{fileName}");
             });
         }
@@ -210,6 +247,7 @@ namespace blockSchemeEditor
             {
                 _fileSystem.CreateFile(fileName);
                 MessageBox.Show($"File created\n{fileName}");
+                this.FormClosed += Form1_FormClosed;
             });
         }
 
@@ -237,11 +275,6 @@ namespace blockSchemeEditor
             });
         }
 
-        private void listBox2_DoubleClick(object sender, EventArgs e)
-        {
-            if (listBox2.Items.Count > 0)
-                OpenParametersPanel();
-        }
         private void listBox2_Click(object sender, EventArgs e)
         {
             if (listBox2.Items.Count > 0)

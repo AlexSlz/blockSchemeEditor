@@ -1,5 +1,7 @@
 ﻿using blockSchemeEditor.Elements;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
@@ -9,11 +11,11 @@ namespace blockSchemeEditor
     internal class FileActions
     {
         private Canvas _canvas;
-        private BinaryFormatter _formatter;
         private SaveElement save;
+        public string FilePath { get; private set; }
+        public string FileName => Path.GetFileName(FilePath);
         public FileActions(Canvas canvas)
         {
-            _formatter = new BinaryFormatter();
             _canvas = canvas;
         }
 
@@ -23,10 +25,15 @@ namespace blockSchemeEditor
             ExportElements();
             ExportLines();
 
-            using(FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            try
             {
-                _formatter.Serialize(fs, save);
-                fs.Close();
+                string json = JsonConvert.SerializeObject(save);
+                File.WriteAllText(path, json);
+                FilePath = path;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, this.ToString());
             }
         }
         private void ExportElements()
@@ -61,13 +68,14 @@ namespace blockSchemeEditor
             if (File.Exists(path))
             {
                 _canvas.ClearElements();
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (StreamReader r = new StreamReader(path))
                 {
-                    save = (SaveElement)_formatter.Deserialize(fs);
-                    fs.Close();
+                    string json = r.ReadToEnd();
+                    save = JsonConvert.DeserializeObject<SaveElement>(json);
                     LoadElements();
                     LoadLines();
                 }
+                FilePath = path;
             }
         }
 

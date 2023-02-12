@@ -1,6 +1,7 @@
 ﻿using blockSchemeEditor.Elements;
 using blockSchemeEditor.Render.MyPanel;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -11,10 +12,19 @@ namespace blockSchemeEditor.Actions
     internal class PanelActions
     {
         private Panel _panel;
-
+        List<PanelSection> sections = new List<PanelSection>();
         public PanelActions(Panel panel)
         {
             _panel = panel;
+        }
+
+        public void DisplayElementsOnPanel(List<ElementObject> elements)
+        {
+            sections = new List<PanelSection>();
+            foreach (var element in elements)
+            {
+                DisplayElementOnPanel(element);
+            }
         }
 
         public void DisplayElementOnPanel(ElementObject element)
@@ -35,7 +45,6 @@ namespace blockSchemeEditor.Actions
             });
             _panel.Controls[0].Controls[_panel.Controls[0].Controls.Count - 1].Focus();
         }
-
         private bool Valid(string itemName, dynamic value, ElementParameter parameter)
         {
             foreach (var element in parameter.HideList)
@@ -51,6 +60,18 @@ namespace blockSchemeEditor.Actions
 
         private int CreateNewPanelSection(MemberInfo item, ElementParameter parameters, int y)
         {
+            foreach (PanelSection section in sections)
+            {
+                if (section.Name == item.Name)
+                {
+                    section.onValueChanged += new Action<dynamic>((data) =>
+                    {
+                        UpdateData(item, parameters, data);
+                    });
+                    return -1;
+                }
+            }
+
             dynamic value = 0;
             switch (item.MemberType)
             {
@@ -65,14 +86,14 @@ namespace blockSchemeEditor.Actions
             if (!Valid(item.Name, value, parameters))
                 return -1;
 
-            PanelSection tempPanel = new PanelSection(value, item.Name);
-            tempPanel.Section.Location = new Point(0, y);
-            tempPanel.onValueChanged += new Action<dynamic>((data) =>
+            sections.Add(new PanelSection(value, item.Name));
+            sections.Last().onValueChanged += new Action<dynamic>((data) =>
             {
                 UpdateData(item, parameters, data);
             });
-            _panel.Controls.Add(tempPanel.Section);
-            y += tempPanel.Section.Height;
+            sections.Last().Section.Location = new Point(0, y);
+            _panel.Controls.Add(sections.Last().Section);
+            y += sections.Last().Section.Height;
 
             return y;
         }

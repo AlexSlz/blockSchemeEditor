@@ -14,11 +14,11 @@ namespace blockSchemeEditor.Elements
                 CustomSize = new Size(110, 110),
             };
 
-        public void Draw(Graphics graphics, ElementParameter parameter)
+        public void Draw(Graphics graphics, ElementParameter parameters)
         {
-            using (SolidBrush pen = new SolidBrush(parameter.CustomColor))
+            using (SolidBrush pen = new SolidBrush(parameters.CustomColor))
             {
-                graphics.FillEllipse(pen, new Rectangle(parameter.Position, parameter.CustomSize));
+                graphics.FillEllipse(pen, new Rectangle(parameters.Position, parameters.CustomSize));
             }
         }
     }

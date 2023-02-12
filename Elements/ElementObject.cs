@@ -60,10 +60,15 @@ namespace blockSchemeEditor.Elements
             using (SolidBrush TextClr = new SolidBrush(Color.Black))
             using (Font drawFont = new Font("Microsoft Sans Serif", 14))
             {
+                Point position = Parameters.Position;
+
+                if (elementData.Name == "Actor")
+                    position.Y = position.Y - (Parameters.CustomSize.Height / 2) - 20;
+
                 sf.LineAlignment = StringAlignment.Center;
                 sf.Alignment = StringAlignment.Center;
                 g.DrawString((Parameters.Text == "") ? elementData.Name : Parameters.Text, drawFont, TextClr,
-                new Rectangle(Parameters.Position, Parameters.CustomSize), sf);
+                new Rectangle(position, Parameters.CustomSize), sf);
             }
         }
         private void DrawFrame(Graphics g)
