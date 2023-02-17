@@ -11,6 +11,10 @@ namespace blockSchemeEditor.Elements
         public Node FirstNode { get; private set; }
         public Node SecondNode { get; private set; }
 
+        public Color LineColor = Color.Black;
+        public bool PolyLine = true;
+        public bool Dotted = false;
+
         public Line(Node firstNode, Node secondNode)
         {
             FirstNode = firstNode;
@@ -20,7 +24,7 @@ namespace blockSchemeEditor.Elements
         public void Draw(Graphics graphics)
         {
             using (AdjustableArrowCap bigArrow = new AdjustableArrowCap(4, 4))
-            using (Pen pen = new Pen(Color.Black, 5))
+            using (Pen pen = new Pen(LineColor, 5))
             {
                 Point first = CalculateNodePosition(FirstNode);
                 Point second = CalculateNodePosition(SecondNode);
@@ -38,6 +42,9 @@ namespace blockSchemeEditor.Elements
 
                 pen.CustomEndCap = bigArrow;
 
+                if(Dotted)
+                    pen.DashStyle = DashStyle.Dash;
+
                 graphics.DrawLines(pen, points.ToArray());
             }
         }
@@ -46,7 +53,7 @@ namespace blockSchemeEditor.Elements
         {
             Point middle = new Point(0, 0);
 
-            if (FirstNode.Parent.Parameters.PolyLine)
+            if (PolyLine)
             {
                 if ((FirstNode.nodePosition == NodePosition.Bottom || FirstNode.nodePosition == NodePosition.Top))
                 {

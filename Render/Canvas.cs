@@ -14,8 +14,10 @@ namespace blockSchemeEditor
         public event System.EventHandler ElementsChanged;
         public List<Line> Lines = new List<Line>();
         public List<ElementObject> selectedItems = new List<ElementObject>();
-        public ElementObject lastSelectedElement = null;
+
         public Node selectedNode { get; set; }
+
+        public List<Line> SelectedLines => Lines.FindAll(line => line.FirstNode == selectedNode || line.SecondNode == selectedNode);
 
         public virtual void OnElementsChanged()
         {
@@ -42,7 +44,6 @@ namespace blockSchemeEditor
 
         private void SelectElement(ElementObject element)
         {
-            lastSelectedElement = element;
             var lastElement = selectedItems.Find(item => item == element);
             if (lastElement == null)
             {
@@ -54,10 +55,6 @@ namespace blockSchemeEditor
                 {
                     selectedItems = new List<ElementObject> { element };
                 }
-            }
-            else
-            {
-                lastSelectedElement = lastElement;
             }
         }
 
@@ -141,7 +138,6 @@ namespace blockSchemeEditor
         public void ClearSelection()
         {
             selectedItems.Clear();
-            lastSelectedElement = null;
             selectedNode = null;
             secondNode = null;
         }

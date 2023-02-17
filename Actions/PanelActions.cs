@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using static System.Windows.Forms.LinkLabel;
 
 namespace blockSchemeEditor.Actions
 {
@@ -114,19 +115,52 @@ namespace blockSchemeEditor.Actions
             }
         }
 
+        public void DisplayLinePanel(List<Line> lines)
+        {
+            int y = 10;
+            y = CreateTempPanelSection(lines[0].PolyLine, "PolyLine", y, new Action<dynamic>((data) =>
+            {
+                lines.ForEach(item =>
+                {
+                    item.PolyLine = data;
+                });
+            }));
+            y = CreateTempPanelSection(lines[0].LineColor, "LineColor", y, new Action<dynamic>((data) =>
+            {
+                lines.ForEach(item =>
+                {
+                    item.LineColor = data;
+                });
+            }));
+            y = CreateTempPanelSection(lines[0].Dotted, "Dotted", y, new Action<dynamic>((data) =>
+            {
+                lines.ForEach(item =>
+                {
+                    item.Dotted = data;
+                });
+            }));
+        }
+
         public void DisplaySettingsPanel(PictureBox pictureBox)
         {
             int y = 10;
-            PanelSection tempPanel = new PanelSection(pictureBox.BackColor, "Background Color");
-            tempPanel.Section.Location = new Point(0, y);
-
-            tempPanel.onValueChanged += new Action<dynamic>((data) =>
+            y = CreateTempPanelSection(pictureBox.BackColor, "Background Color", y, new Action<dynamic>((data) =>
             {
                 pictureBox.BackColor = data;
-            });
+            }));
+        }
+
+        private int CreateTempPanelSection(dynamic value, string name, int y, Action<dynamic> callBack)
+        {
+            PanelSection tempPanel = new PanelSection(value, name);
+            tempPanel.Section.Location = new Point(0, y);
+
+            tempPanel.onValueChanged += callBack;
 
             _panel.Controls.Add(tempPanel.Section);
             y += tempPanel.Section.Height;
+
+            return y;
         }
 
     }

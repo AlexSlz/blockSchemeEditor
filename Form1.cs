@@ -58,7 +58,7 @@ namespace blockSchemeEditor
                 contextMenuStrip1.Items.Add(deleteRegEditButton);
             }
 
-            _canvas.Elements.Add(new ElementObject(new Point(500, 200), new Star()));
+            //_canvas.Elements.Add(new ElementObject(new Point(500, 200), new Document()));
 
 
             /*            Random rand = new Random();
@@ -153,11 +153,15 @@ namespace blockSchemeEditor
                 panel1.Hide();
                 panel1.Controls.Clear();
             }
-            if (_canvas.lastSelectedElement != null)
+            if (_canvas.selectedItems.Count > 0)
             {
                 panel1.Show();
-                //_panelActions.DisplayElementOnPanel(_canvas.lastSelectedElement);
                 _panelActions.DisplayElementsOnPanel(_canvas.selectedItems);
+            }
+            else if(_canvas.SelectedLines.Count > 0)
+            {
+                panel1.Show();
+                _panelActions.DisplayLinePanel(_canvas.SelectedLines);
             }
             else {
                 panel1.Show();

@@ -12,7 +12,6 @@ namespace blockSchemeEditor.Elements
 
         public string Text;
         public int Index = 0;
-        public bool PolyLine = true;
         public Point Position;
         public Size CustomSize;
         public Color CustomColor;

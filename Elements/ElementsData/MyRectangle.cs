@@ -12,11 +12,11 @@ namespace blockSchemeEditor.Elements
                                     CustomColor = Color.Aquamarine, 
                                     CustomSize = new Size(200,100) };
 
-        public void Draw(Graphics graphics, ElementParameter parameter)
+        public void Draw(Graphics graphics, ElementParameter parameters)
         {
-            using(SolidBrush pen = new SolidBrush(parameter.CustomColor))
+            using(SolidBrush pen = new SolidBrush(parameters.CustomColor))
             {
-                graphics.FillRectangle(pen, new Rectangle(parameter.Position, parameter.CustomSize));
+                graphics.FillRectangle(pen, new Rectangle(parameters.Position, parameters.CustomSize));
             }
         }
     }
