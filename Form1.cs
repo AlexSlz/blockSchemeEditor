@@ -1,4 +1,5 @@
 ﻿using blockSchemeEditor.Actions;
+using blockSchemeEditor.Commands;
 using blockSchemeEditor.Elements;
 using blockSchemeEditor.Elements.ElementsData;
 using System;
@@ -28,6 +29,7 @@ namespace blockSchemeEditor
         private Canvas _canvas;
         private FileActions _fileSystem;
         private PanelActions _panelActions;
+        private List<ICommand> _usedCommands = new List<ICommand>();
 
         public Form1(string[] args)
         {
@@ -57,16 +59,6 @@ namespace blockSchemeEditor
                 };
                 contextMenuStrip1.Items.Add(deleteRegEditButton);
             }
-
-            //_canvas.Elements.Add(new ElementObject(new Point(500, 200), new Document()));
-
-
-            /*            Random rand = new Random();
-                        for (int i = 0; i < 10; i++)
-                        {
-                            _canvas.Elements.Add(new ElementObject(new Point(rand.Next(200, 500), rand.Next(200, 500)), elements[rand.Next(0, elements.Count - 1)]));
-                        }*/
-
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -202,16 +194,23 @@ namespace blockSchemeEditor
             DialogResult dialogResult = MessageBox.Show($"Delete, {selectedItemText}?", ":)", MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
 
             if (_canvas.selectedNode == null && elementTODelete.Count <= 0 && dialogResult == DialogResult.Yes)
-                _canvas.ClearElements();
+            {
+                AddCommand(new DeleteCommand(_canvas, _canvas.Elements));
+            }
 
-            if (_canvas.selectedNode != null && dialogResult == DialogResult.Yes)
-                ElementActions.DeleteNode(_canvas, _canvas.selectedNode);
-            if (elementTODelete != null && dialogResult == DialogResult.Yes)
-                _canvas.DeleteElements(elementTODelete);
+            else if (_canvas.selectedNode != null && dialogResult == DialogResult.Yes)
+            {
+                AddCommand(new DeleteNodeCommand(_canvas, _canvas.selectedNode));
+            }
+            else if (elementTODelete != null && dialogResult == DialogResult.Yes)
+            {
+               AddCommand(new DeleteCommand(_canvas, elementTODelete));
+            }
 
             panel1.Hide();
             panel1.Controls.Clear();
         }
+
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog1.Filter = "blockSheme (.block)|*.block";
@@ -297,5 +296,28 @@ namespace blockSchemeEditor
         {
             e.Effect = DragDropEffects.Move;
         }
+
+        private void undoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_usedCommands.Count > 0)
+            {
+                _usedCommands.Last().Undo();
+                _usedCommands.Remove(_usedCommands.Last());
+                if(_usedCommands.Count > 0 )
+                    contextMenuStrip1.Items[0].Text = $"Undo | {_usedCommands.Last().CommandName}";
+                else
+                    contextMenuStrip1.Items[0].Text = $"Undo";
+            }
+            else
+            {
+                MessageBox.Show("No Command To Undo.");
+            }
+        }
+
+        private void AddCommand(ICommand command)
+        {
+            contextMenuStrip1.Items[0].Text = $"Undo | {_usedCommands.AddCommand(command)}";
+        }
+
     }
 }

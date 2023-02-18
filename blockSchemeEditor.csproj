@@ -79,6 +79,9 @@
   <ItemGroup>
     <Compile Include="Actions\ElementActions.cs" />
     <Compile Include="Actions\PanelActions.cs" />
+    <Compile Include="Commands\DeleteCommand.cs" />
+    <Compile Include="Commands\DeleteNodeCommand.cs" />
+    <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Elements\ElementObject.cs" />
     <Compile Include="Elements\ElementParameter.cs" />
     <Compile Include="Elements\ElementsData\Actor.cs" />

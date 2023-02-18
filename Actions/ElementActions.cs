@@ -1,13 +1,14 @@
-﻿using blockSchemeEditor.Elements;
+﻿using blockSchemeEditor.Commands;
+using blockSchemeEditor.Elements;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace blockSchemeEditor
 {
     internal static class ElementActions
     {
-
         public static void DeleteElements(this Canvas canvas, List<ElementObject> elements)
         {
             elements.ForEach(element =>
@@ -24,7 +25,6 @@ namespace blockSchemeEditor
                 DeleteNode(canvas, node);
             });
             canvas.Elements.Remove(element);
-
             canvas.OnElementsChanged();
         }
 
@@ -33,7 +33,7 @@ namespace blockSchemeEditor
             canvas.Elements.Add(element);
             canvas.OnElementsChanged();
         }
-        public static void DeleteNode(Canvas canvas, Node node)
+        public static List<Line> DeleteNode(this Canvas canvas, Node node)
         {
             var currentLines = canvas.Lines.FindAll(line => line.FirstNode == node || line.SecondNode == node);
 
@@ -41,6 +41,7 @@ namespace blockSchemeEditor
             {
                 canvas.Lines.Remove(line);
             });
+            return currentLines;
         }
         public static void Move(this ElementObject element, Point pos, Point oldPos)
         {
@@ -53,7 +54,6 @@ namespace blockSchemeEditor
         {
             elements.ForEach(element =>
             {
-
                 element.Move(pos, oldPos);
             });
         }
@@ -64,6 +64,14 @@ namespace blockSchemeEditor
             {
                 node.Move(element.Parameters.Position, element.Parameters.CustomSize);
             });
+        }
+
+
+        public static string AddCommand(this List<ICommand> commandList, ICommand command)
+        {
+            commandList.Add(command);
+            command.Execute();
+            return command.CommandName;
         }
     }
 }
